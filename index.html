@@ -14,11 +14,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Habilitar modo oscuro manual
+        }
+    </script>
     <style>
         /* Tipografía estilo Apple */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-image 0.5s ease-in-out;
+            transition: background-image 0.5s ease-in-out, background-color 0.3s ease, color 0.3s ease;
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -26,11 +31,38 @@
             overscroll-behavior-y: none;
         }
 
-        /* Variables CSS */
+        /* --- VARIABLES DE TEMA --- */
         :root {
+            /* Light Mode Default */
+            --bg-body: #f3f4f6;
             --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.5);
             --sidebar-bg: rgba(245, 245, 247, 0.6);
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --modal-bg: #ffffff;
+            --input-bg: #f9fafb;
+            --nav-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode Overrides */
+            --bg-body: #111827;
+            --glass-bg: rgba(31, 41, 55, 0.75);
+            --glass-border: rgba(75, 85, 99, 0.4);
+            --sidebar-bg: rgba(17, 24, 39, 0.6);
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --card-bg: rgba(31, 41, 55, 0.6);
+            --modal-bg: #1f2937;
+            --input-bg: #374151;
+            --nav-bg: rgba(31, 41, 55, 0.9);
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
         }
 
         /* --- ESTILOS DE ESCRITORIO --- */
@@ -45,7 +77,24 @@
         .glass-sidebar {
             background: var(--sidebar-bg);
             backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
+            border-right: 1px solid var(--glass-border);
+        }
+
+        /* Adaptación de componentes al tema */
+        .theme-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .theme-modal {
+            background-color: var(--modal-bg);
+            color: var(--text-main);
+        }
+
+        .theme-input {
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            border-color: var(--glass-border);
         }
 
         /* --- ADAPTACIÓN MÓVIL --- */
@@ -53,7 +102,6 @@
             body {
                 padding: 0 !important;
                 background-image: none !important;
-                background-color: #f3f4f6;
             }
             
             .glass-panel {
@@ -63,21 +111,26 @@
                 border-radius: 0 !important;
                 border: none !important;
                 box-shadow: none !important;
+                background: var(--bg-body) !important; /* Usar color de fondo en móvil */
             }
 
-            /* Clases utilitarias para manejo de vistas móviles */
             .mobile-hidden { display: none !important; }
             .mobile-flex { display: flex !important; }
             
-            /* Ajustes modales móvil */
             #settings-modal > div { height: 100%; width: 100%; border-radius: 0; }
+            
+            .mobile-nav {
+                background-color: var(--nav-bg);
+                border-top: 1px solid var(--glass-border);
+            }
         }
 
         /* Utilidades */
         .toast-notification {
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--modal-bg);
+            color: var(--text-main);
             backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--glass-border);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             border-radius: 14px;
             animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -99,23 +152,23 @@
         .sync-active { background-color: #dcfce7; color: #166534; }
         .sync-offline { background-color: #f3f4f6; color: #6b7280; }
         
-        .nav-btn-active { color: #2563eb; } /* Azul Apple */
+        .nav-btn-active { color: #3b82f6; } /* Azul Tailwind */
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white" id="app-body">
+<body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white transition-colors duration-300" id="app-body">
 
     <!-- Contenedor Principal -->
     <main class="w-full max-w-7xl h-[92vh] glass-panel rounded-2xl flex flex-col overflow-hidden relative fade-in">
         
         <!-- Header -->
-        <header class="h-14 flex items-center justify-between px-5 border-b border-gray-200/30 bg-white/40 shrink-0 select-none backdrop-blur-md z-20">
+        <header class="h-14 flex items-center justify-between px-5 border-b border-gray-200/30 bg-white/10 shrink-0 select-none backdrop-blur-md z-20 transition-colors" style="border-bottom-color: var(--glass-border);">
             <div class="flex gap-2">
                 <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E] hover:bg-[#FF5F57]/80 cursor-pointer shadow-sm"></div>
                 <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24] hover:bg-[#FEBC2E]/80 cursor-pointer shadow-sm"></div>
                 <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29] hover:bg-[#28C840]/80 cursor-pointer shadow-sm"></div>
             </div>
             
-            <div class="text-sm font-semibold text-gray-600/90 tracking-tight flex items-center gap-2">
+            <div class="text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
                 <i data-lucide="command" class="w-4 h-4"></i>
                 <span class="hidden sm:inline">MyDay OS</span>
                 <span class="sm:hidden">MyDay</span>
@@ -125,15 +178,21 @@
                 <div id="sync-status-indicator" class="sync-badge sync-offline hidden sm:flex" title="Estado">
                     <div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local
                 </div>
+                
+                <!-- Botón Tema Oscuro/Claro -->
+                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
+                    <i id="theme-icon" data-lucide="moon" class="w-5 h-5" style="color: var(--text-main);"></i>
+                </button>
+
                 <div id="user-avatar" class="hidden w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold overflow-hidden border border-white shadow-sm">
                     <img id="user-photo" src="" alt="User" class="w-full h-full object-cover">
                 </div>
-                <button onclick="openSettings()" class="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-md hover:bg-white/50">
-                    <i data-lucide="settings-2" class="w-5 h-5"></i>
+                <button onclick="openSettings()" class="text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10">
+                    <i data-lucide="settings-2" class="w-5 h-5" style="color: var(--text-main);"></i>
                 </button>
                 <div class="text-right hidden sm:block">
-                    <div id="live-clock" class="text-sm font-medium text-gray-700 tabular-nums leading-none">--:--</div>
-                    <div id="live-date-full" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-none mt-1">Cargando...</div>
+                    <div id="live-clock" class="text-sm font-medium tabular-nums leading-none" style="color: var(--text-main);">--:--</div>
+                    <div id="live-date-full" class="text-[10px] font-medium uppercase tracking-wider leading-none mt-1" style="color: var(--text-muted);">Cargando...</div>
                 </div>
             </div>
         </header>
@@ -143,50 +202,48 @@
             
             <!-- VISTA 1: AGENDA -->
             <section id="view-agenda" class="w-full md:w-[35%] glass-sidebar flex flex-col md:min-w-[320px] md:max-w-md relative z-10 transition-all mobile-flex">
-                <div class="p-5 pb-2 border-b border-gray-200/50">
+                <div class="p-5 pb-2 border-b" style="border-bottom-color: var(--glass-border);">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 tracking-tight">
+                        <h2 class="text-xl font-bold flex items-center gap-2 tracking-tight" style="color: var(--text-main);">
                             <i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i> Agenda
                         </h2>
-                        <button onclick="openModal('schedule')" class="w-8 h-8 rounded-full bg-white shadow-sm hover:shadow text-blue-600 flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-blue-50">
+                        <button onclick="openModal('schedule')" class="w-8 h-8 rounded-full bg-white dark:bg-gray-700 shadow-sm hover:shadow text-blue-600 flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-blue-50 dark:border-gray-600">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                         </button>
                     </div>
-                    <div class="flex justify-between bg-gray-200/50 p-1 rounded-lg mb-2 overflow-x-auto no-scrollbar">
-                        <div id="day-selector" class="flex w-full justify-between gap-1"></div>
-                    </div>
+                    <div class="flex justify-between p-1 rounded-lg mb-2 overflow-x-auto no-scrollbar" id="day-selector" style="background-color: var(--glass-border);"></div>
                 </div>
                 <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 md:pb-4" id="schedule-list"></div>
-                <div class="hidden md:flex p-3 border-t border-gray-200/50 bg-white/30 text-xs text-center text-gray-500 font-medium justify-between px-6">
+                <div class="hidden md:flex p-3 border-t bg-white/30 text-xs text-center font-medium justify-between px-6" style="border-top-color: var(--glass-border); color: var(--text-muted);">
                     <span id="schedule-summary">0 eventos</span>
-                    <span class="text-blue-500 cursor-pointer hover:underline" onclick="setDay(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1)">Ir a Hoy</span>
+                    <span class="text-blue-500 cursor-pointer hover:underline" onclick="goToToday()">Ir a Hoy</span>
                 </div>
             </section>
 
             <!-- VISTA 2: TAREAS -->
             <section id="view-tasks" class="flex-1 bg-white/30 flex-col relative w-full mobile-hidden md:flex">
                 <div class="p-4 md:p-6 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-                    <div class="bg-white/70 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-24 md:h-28">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Pendientes</span><i data-lucide="list-todo" class="w-4 h-4 text-orange-500"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold text-gray-800" id="pending-count">0</span>
+                    <div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
+                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Pendientes</span><i data-lucide="list-todo" class="w-4 h-4 text-orange-500"></i></div>
+                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="pending-count">0</span>
                     </div>
-                    <div class="bg-white/70 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-24 md:h-28">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Hoy</span><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold text-gray-800" id="today-events-count">0</span>
+                    <div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
+                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Hoy</span><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i></div>
+                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="today-events-count">0</span>
                     </div>
-                    <div class="bg-white/70 backdrop-blur-md p-4 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-24 md:h-28 col-span-2 md:col-span-1">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider">Historial</span><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold text-gray-800" id="completed-count">0</span>
+                    <div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28 col-span-2 md:col-span-1">
+                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Historial</span><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i></div>
+                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="completed-count">0</span>
                     </div>
                 </div>
 
-                <div class="flex-1 mx-2 md:mx-4 mb-20 md:mb-4 bg-white/50 backdrop-blur-xl rounded-2xl shadow-sm border border-white/60 flex flex-col overflow-hidden">
-                    <div class="p-4 md:p-5 flex justify-between items-center border-b border-gray-100 bg-white/40 sticky top-0 z-10">
+                <div class="flex-1 mx-2 md:mx-4 mb-20 md:mb-4 theme-card backdrop-blur-xl rounded-2xl shadow-sm flex flex-col overflow-hidden">
+                    <div class="p-4 md:p-5 flex justify-between items-center border-b bg-white/40 sticky top-0 z-10" style="border-bottom-color: var(--glass-border);">
                         <div class="flex items-center gap-2">
-                            <h3 class="text-lg font-bold text-gray-700">Tareas</h3>
-                            <span class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold" id="total-todos-badge">0</span>
+                            <h3 class="text-lg font-bold" style="color: var(--text-main);">Tareas</h3>
+                            <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-200 text-[10px] px-2 py-0.5 rounded-full font-bold" id="total-todos-badge">0</span>
                         </div>
-                        <button onclick="openModal('todo')" class="text-sm font-medium px-4 py-2 rounded-lg bg-gray-900 text-white shadow-lg hover:bg-black transition-all flex items-center gap-2 active:scale-95">
+                        <button onclick="openModal('todo')" class="text-sm font-medium px-4 py-2 rounded-lg bg-gray-900 dark:bg-blue-600 text-white shadow-lg hover:bg-black dark:hover:bg-blue-700 transition-all flex items-center gap-2 active:scale-95">
                             <i data-lucide="plus-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">Nueva</span>
                         </button>
                     </div>
@@ -196,13 +253,13 @@
         </div>
 
         <!-- BARRA DE NAVEGACIÓN MÓVIL -->
-        <nav class="md:hidden absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 flex justify-around items-center z-50 pb-safe">
-            <button onclick="switchMobileView('agenda')" class="flex flex-col items-center justify-center w-full h-full text-gray-400 nav-btn nav-btn-active" id="btn-nav-agenda">
+        <nav class="md:hidden absolute bottom-0 left-0 right-0 h-16 mobile-nav flex justify-around items-center z-50 pb-safe backdrop-blur-xl">
+            <button onclick="switchMobileView('agenda')" class="flex flex-col items-center justify-center w-full h-full nav-btn nav-btn-active" id="btn-nav-agenda" style="color: var(--text-muted);">
                 <i data-lucide="calendar-days" class="w-6 h-6 mb-0.5"></i>
                 <span class="text-[10px] font-medium">Agenda</span>
             </button>
-            <div class="w-px h-8 bg-gray-100"></div>
-            <button onclick="switchMobileView('tasks')" class="flex flex-col items-center justify-center w-full h-full text-gray-400 nav-btn" id="btn-nav-tasks">
+            <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+            <button onclick="switchMobileView('tasks')" class="flex flex-col items-center justify-center w-full h-full nav-btn" id="btn-nav-tasks" style="color: var(--text-muted);">
                 <i data-lucide="check-square" class="w-6 h-6 mb-0.5"></i>
                 <span class="text-[10px] font-medium">Tareas</span>
             </button>
@@ -215,17 +272,17 @@
         <div id="modal" class="absolute inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeModal()"></div>
             <div class="absolute inset-0 flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none">
-                <div class="bg-white w-full md:w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform translate-y-full md:scale-95 md:translate-y-0 opacity-0 transition-all duration-300 pointer-events-auto border border-gray-100 flex flex-col max-h-[90vh]" id="modal-content">
+                <div class="theme-modal w-full md:w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform translate-y-full md:scale-95 md:translate-y-0 opacity-0 transition-all duration-300 pointer-events-auto border border-gray-100 dark:border-gray-700 flex flex-col max-h-[90vh]" id="modal-content">
                     <div class="p-6 overflow-y-auto">
-                        <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-4 md:hidden"></div>
+                        <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mx-auto mb-4 md:hidden"></div>
                         <div class="flex justify-between items-center mb-6">
-                            <div><h3 class="text-xl font-bold text-gray-900" id="modal-title">Título</h3><p class="text-sm text-gray-500" id="modal-subtitle">Subtítulo</p></div>
-                            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"><i data-lucide="x" class="w-4 h-4"></i></button>
+                            <div><h3 class="text-xl font-bold" id="modal-title" style="color: var(--text-main);">Título</h3><p class="text-sm" id="modal-subtitle" style="color: var(--text-muted);">Subtítulo</p></div>
+                            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors" style="color: var(--text-main);"><i data-lucide="x" class="w-4 h-4"></i></button>
                         </div>
                         <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
                             <div id="form-fields"></div>
-                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                                <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cancelar</button>
+                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6">
+                                <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cancelar</button>
                                 <button type="submit" class="px-6 py-3 md:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition transform active:scale-95 text-sm flex items-center justify-center gap-2 flex-1 md:flex-none"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button>
                             </div>
                         </form>
@@ -236,42 +293,60 @@
 
         <!-- SETTINGS MODAL -->
         <div id="settings-modal" class="absolute inset-0 z-50 hidden flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm p-0 md:p-4">
-            <div class="bg-white w-full h-[85vh] md:h-[500px] md:w-full md:max-w-2xl rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.2s_ease-out]">
-                <div class="md:hidden p-4 border-b flex justify-between items-center bg-gray-50">
-                    <h3 class="font-bold text-gray-800">Ajustes</h3>
-                    <button onclick="closeSettings()" class="bg-gray-200 p-1.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <div class="theme-modal w-full h-[85vh] md:h-[500px] md:w-full md:max-w-2xl rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+                <div class="md:hidden p-4 border-b flex justify-between items-center bg-gray-50 dark:bg-gray-800" style="border-bottom-color: var(--glass-border);">
+                    <h3 class="font-bold">Ajustes</h3>
+                    <button onclick="closeSettings()" class="bg-gray-200 dark:bg-gray-700 p-1.5 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                 </div>
-                <div class="w-full md:w-1/3 bg-gray-50 border-r p-2 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible no-scrollbar shrink-0">
-                    <button onclick="switchSettingsTab('general')" class="settings-tab-btn active text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition whitespace-nowrap bg-white shadow-sm text-blue-600" data-tab="general"><i data-lucide="layout" class="w-4 h-4 inline mr-2"></i> General</button>
-                    <button onclick="switchSettingsTab('cloud')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition text-blue-600 whitespace-nowrap" data-tab="cloud"><i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i> Cloud</button>
-                    <button onclick="switchSettingsTab('categories')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition whitespace-nowrap" data-tab="categories"><i data-lucide="tags" class="w-4 h-4 inline mr-2"></i> Categorías</button>
-                    <button onclick="switchSettingsTab('data')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition whitespace-nowrap" data-tab="data"><i data-lucide="database" class="w-4 h-4 inline mr-2"></i> Datos</button>
-                    <button onclick="switchSettingsTab('system')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition whitespace-nowrap" data-tab="system"><i data-lucide="bell" class="w-4 h-4 inline mr-2"></i> Sistema</button>
+                <div class="w-full md:w-1/3 border-r p-2 md:p-4 flex flex-row md:flex-col gap-2 overflow-x-auto md:overflow-visible no-scrollbar shrink-0" style="background-color: var(--sidebar-bg); border-right-color: var(--glass-border);">
+                    <button onclick="switchSettingsTab('general')" class="settings-tab-btn active w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap bg-white dark:bg-gray-700 shadow-sm text-blue-600" data-tab="general"><i data-lucide="layout" class="w-4 h-4 inline mr-2"></i> General</button>
+                    <button onclick="switchSettingsTab('cloud')" class="settings-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap" data-tab="cloud" style="color: var(--text-main);"><i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i> Cloud</button>
+                    <button onclick="switchSettingsTab('categories')" class="settings-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap" data-tab="categories" style="color: var(--text-main);"><i data-lucide="tags" class="w-4 h-4 inline mr-2"></i> Categorías</button>
+                    <button onclick="switchSettingsTab('data')" class="settings-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap" data-tab="data" style="color: var(--text-main);"><i data-lucide="database" class="w-4 h-4 inline mr-2"></i> Datos</button>
+                    <button onclick="switchSettingsTab('system')" class="settings-tab-btn w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition whitespace-nowrap" data-tab="system" style="color: var(--text-main);"><i data-lucide="bell" class="w-4 h-4 inline mr-2"></i> Sistema</button>
                 </div>
                 <div class="flex-1 p-6 md:p-8 overflow-y-auto relative">
-                    <button onclick="closeSettings()" class="hidden md:block absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                    <button onclick="closeSettings()" class="hidden md:block absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-300"><i data-lucide="x" class="w-5 h-5"></i></button>
                     
-                    <!-- Pestaña General Rediseñada -->
+                    <!-- Pestaña General -->
                     <div id="tab-general" class="settings-content block">
                         <h2 class="text-xl font-bold mb-4">Personalización</h2>
                         
-                        <!-- URL Input Primero -->
+                        <!-- URL Input -->
                         <div class="mb-6">
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Imagen Personalizada (URL)</label>
+                            <label class="block text-xs font-bold uppercase mb-2" style="color: var(--text-muted);">Imagen Personalizada (URL)</label>
                             <div class="flex gap-2">
-                                <input type="text" id="bg-url-input" class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400" placeholder="https://...">
+                                <input type="text" id="bg-url-input" class="theme-input flex-1 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400" placeholder="https://...">
                                 <button onclick="saveBackground()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm">Aplicar</button>
                             </div>
                         </div>
 
-                        <!-- Presets en Círculos -->
+                        <!-- Zona Horaria -->
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold uppercase mb-2" style="color: var(--text-muted);">Zona Horaria</label>
+                            <select id="timezone-select" onchange="saveTimezone()" class="theme-input w-full border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="system">🕒 Automático (Sistema)</option>
+                                <option value="UTC">UTC (Tiempo Universal)</option>
+                                <option value="America/New_York">🇺🇸 Nueva York (EST)</option>
+                                <option value="Europe/London">🇬🇧 Londres (GMT)</option>
+                                <option value="Europe/Madrid">🇪🇸 Madrid (CET)</option>
+                                <option value="Asia/Tokyo">🇯🇵 Tokio (JST)</option>
+                                <option value="America/Mexico_City">🇲🇽 CDMX (CST)</option>
+                                <option value="America/Bogota">🇨🇴 Bogotá (COT)</option>
+                                <option value="America/Argentina/Buenos_Aires">🇦🇷 Buenos Aires (ART)</option>
+                                <option value="America/Lima">🇵🇪 Lima (PET)</option>
+                            </select>
+                            <p class="text-[10px] mt-1" style="color: var(--text-muted);">Afecta al reloj y a los eventos del calendario.</p>
+                        </div>
+
+                        <!-- Presets -->
                         <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Fondos Predeterminados</label>
+                            <label class="block text-xs font-bold uppercase mb-3" style="color: var(--text-muted);">Fondos Predeterminados</label>
                             <div class="flex gap-3 flex-wrap">
                                 <button onclick="setPresetBg('nature')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200')" title="Naturaleza"></button>
                                 <button onclick="setPresetBg('dark')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200')" title="Oscuro"></button>
                                 <button onclick="setPresetBg('abstract')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200')" title="Abstracto"></button>
-                                <button onclick="setPresetBg('white')" class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all shadow-sm transform hover:scale-105" title="Limpiar Fondo"><i data-lucide="ban" class="w-5 h-5"></i></button>
+                                <button onclick="setPresetBg('white')" class="w-12 h-12 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all shadow-sm transform hover:scale-105" title="Limpiar Fondo"><i data-lucide="ban" class="w-5 h-5"></i></button>
                             </div>
                         </div>
                     </div>
@@ -279,34 +354,34 @@
                     <div id="tab-cloud" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Sincronización Google</h2>
                         <div id="auth-ui" class="text-center py-8">
-                            <p class="text-sm text-gray-500 mb-4">Guarda tus datos en la nube.</p>
+                            <p class="text-sm mb-4" style="color: var(--text-muted);">Guarda tus datos en la nube.</p>
                             <button onclick="loginWithGoogle()" class="bg-white border text-gray-700 px-6 py-3 rounded-xl shadow-sm flex items-center gap-3 w-full justify-center font-medium hover:bg-gray-50"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Conectar Google</button>
                         </div>
                         <div id="user-ui" class="hidden">
-                            <div class="bg-green-50 p-4 rounded-xl border border-green-100 mb-4 flex items-center gap-3"><img id="user-img-settings" src="" class="w-10 h-10 rounded-full"><div class="overflow-hidden"><div id="user-name-settings" class="font-bold text-gray-800 truncate">Usuario</div><div class="text-xs text-green-700 font-medium">Sincronización activa</div></div></div>
-                            <button onclick="logout()" class="w-full py-3 text-red-500 font-bold bg-red-50 hover:bg-red-100 rounded-xl">Cerrar Sesión</button>
+                            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-xl border border-green-100 dark:border-green-800 mb-4 flex items-center gap-3"><img id="user-img-settings" src="" class="w-10 h-10 rounded-full"><div class="overflow-hidden"><div id="user-name-settings" class="font-bold truncate" style="color: var(--text-main);">Usuario</div><div class="text-xs text-green-700 dark:text-green-400 font-medium">Sincronización activa</div></div></div>
+                            <button onclick="logout()" class="w-full py-3 text-red-500 font-bold bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl">Cerrar Sesión</button>
                         </div>
                     </div>
 
                     <div id="tab-categories" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Categorías</h2>
-                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4"><input type="text" name="catName" placeholder="Nombre" class="flex-1 px-3 py-2 bg-gray-100 rounded-lg outline-none text-sm" required><select name="catColor" class="px-3 py-2 bg-gray-100 rounded-lg outline-none text-sm"><option value="blue">Azul</option><option value="red">Rojo</option><option value="green">Verde</option><option value="purple">Morado</option><option value="orange">Naranja</option></select><button type="submit" class="p-2 bg-black text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button></form>
+                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4"><input type="text" name="catName" placeholder="Nombre" class="theme-input flex-1 px-3 py-2 rounded-lg outline-none text-sm" required><select name="catColor" class="theme-input px-3 py-2 rounded-lg outline-none text-sm"><option value="blue">Azul</option><option value="red">Rojo</option><option value="green">Verde</option><option value="purple">Morado</option><option value="orange">Naranja</option></select><button type="submit" class="p-2 bg-black dark:bg-blue-600 text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button></form>
                         <div id="categories-list" class="space-y-2"></div>
                     </div>
 
                     <div id="tab-data" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Datos</h2>
                         <div class="space-y-3">
-                            <button onclick="exportData()" class="w-full flex justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100"><span class="text-sm font-medium">Backup</span><i data-lucide="download" class="w-4 h-4"></i></button>
+                            <button onclick="exportData()" class="w-full flex justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600"><span class="text-sm font-medium">Backup</span><i data-lucide="download" class="w-4 h-4"></i></button>
                             <input type="file" id="import-file" class="hidden" onchange="importData(this)">
-                            <button onclick="document.getElementById('import-file').click()" class="w-full flex justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100"><span class="text-sm font-medium">Restaurar</span><i data-lucide="upload" class="w-4 h-4"></i></button>
+                            <button onclick="document.getElementById('import-file').click()" class="w-full flex justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-600"><span class="text-sm font-medium">Restaurar</span><i data-lucide="upload" class="w-4 h-4"></i></button>
                             <button onclick="resetAllData()" class="w-full p-3 text-red-500 text-sm font-bold mt-4">Borrar todo</button>
                         </div>
                     </div>
 
                     <div id="tab-system" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Sistema</h2>
-                        <div class="flex justify-between p-4 border rounded-xl items-center"><div><h4 class="font-bold text-sm">Notificaciones</h4><p class="text-xs text-gray-500">Alertas navegador</p></div><label class="relative inline-flex cursor-pointer"><input type="checkbox" id="browser-notify-toggle" class="sr-only peer" onchange="toggleBrowserNotifications()"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label></div>
+                        <div class="flex justify-between p-4 border rounded-xl items-center" style="border-color: var(--glass-border);"><div><h4 class="font-bold text-sm">Notificaciones</h4><p class="text-xs" style="color: var(--text-muted);">Alertas navegador</p></div><label class="relative inline-flex cursor-pointer"><input type="checkbox" id="browser-notify-toggle" class="sr-only peer" onchange="toggleBrowserNotifications()"><div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div></label></div>
                     </div>
                 </div>
             </div>
@@ -322,7 +397,7 @@
             currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
             schedule: [], todos: [],
             categories: [{id:'c1',name:'Clase',color:'blue'}, {id:'c2',name:'Tarea',color:'orange'}, {id:'c3',name:'Ocio',color:'purple'}, {id:'c4',name:'Urgente',color:'red'}],
-            settings: { bgUrl: '', browserNotifications: false }
+            settings: { bgUrl: '', browserNotifications: false, theme: 'light', timezone: 'system' }
         };
         
         let auth, db, appId, currentUser, isCloudAvailable = false, unsubscribeSnapshot = null, isSaving = false;
@@ -335,6 +410,11 @@
         function init() {
             const local = localStorage.getItem('myDayOS_v3');
             if(local) state = {...state, ...JSON.parse(local)};
+            
+            // Aplicar configuraciones iniciales
+            applyTheme();
+            applySettings();
+            
             render();
             setupAuthListener();
             setInterval(updateClock, 1000);
@@ -342,37 +422,80 @@
             updateClock();
         }
 
+        // --- TIMEZONE LOGIC ---
+        function getNowInTimezone() {
+            const now = new Date();
+            if (state.settings.timezone === 'system') return now;
+            const tzString = new Date().toLocaleString("en-US", {timeZone: state.settings.timezone});
+            return new Date(tzString);
+        }
+
+        function getCurrentDayName() {
+            const now = getNowInTimezone();
+            return DAYS_FULL[now.getDay()];
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            if (state.settings.timezone !== 'system') { timeOptions.timeZone = state.settings.timezone; dateOptions.timeZone = state.settings.timezone; }
+            const timeStr = now.toLocaleTimeString('es-ES', timeOptions);
+            const dateFull = now.toLocaleDateString('es-ES', dateOptions);
+            const timeEl = document.getElementById('live-clock'); if(timeEl) timeEl.textContent = timeStr;
+            const dateEl = document.getElementById('live-date-full'); if(dateEl) dateEl.textContent = dateFull;
+        }
+
+        function saveTimezone() {
+            const select = document.getElementById('timezone-select');
+            state.settings.timezone = select.value;
+            saveData(); updateClock(); renderDays(); renderSchedule();
+            showToast(`Hora cambiada a: ${select.options[select.selectedIndex].text}`, 'Sistema');
+        }
+
+        // --- THEME LOGIC ---
+        function toggleTheme() {
+            state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light';
+            saveData(); applyTheme();
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            if (state.settings.theme === 'dark') {
+                html.setAttribute('data-theme', 'dark'); html.classList.add('dark');
+                if(icon) { icon.setAttribute('data-lucide', 'sun'); icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>'; }
+            } else {
+                html.removeAttribute('data-theme'); html.classList.remove('dark');
+                if(icon) { icon.setAttribute('data-lucide', 'moon'); icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>'; }
+            }
+        }
+
         // --- RENDER & VIEW LOGIC ---
         function render() {
-            renderDays();
-            renderSchedule();
-            renderTodos();
-            renderStats();
-            applySettings();
-            lucide.createIcons();
+            renderDays(); renderSchedule(); renderTodos(); renderStats(); applySettings(); lucide.createIcons();
         }
 
         function switchMobileView(view) {
-            const agenda = document.getElementById('view-agenda');
-            const tasks = document.getElementById('view-tasks');
-            const btnAgenda = document.getElementById('btn-nav-agenda');
-            const btnTasks = document.getElementById('btn-nav-tasks');
-
+            const agenda = document.getElementById('view-agenda'), tasks = document.getElementById('view-tasks');
+            const btnAgenda = document.getElementById('btn-nav-agenda'), btnTasks = document.getElementById('btn-nav-tasks');
             if (view === 'agenda') {
                 agenda.classList.remove('mobile-hidden'); agenda.classList.add('mobile-flex');
                 tasks.classList.add('mobile-hidden'); tasks.classList.remove('mobile-flex');
                 btnAgenda.classList.add('nav-btn-active'); btnAgenda.classList.remove('text-gray-400');
                 btnTasks.classList.remove('nav-btn-active'); btnTasks.classList.add('text-gray-400');
+                btnAgenda.style.color = '#3b82f6'; btnTasks.style.color = 'var(--text-muted)';
             } else {
                 tasks.classList.remove('mobile-hidden'); tasks.classList.add('mobile-flex');
                 agenda.classList.add('mobile-hidden'); agenda.classList.remove('mobile-flex');
                 btnTasks.classList.add('nav-btn-active'); btnTasks.classList.remove('text-gray-400');
                 btnAgenda.classList.remove('nav-btn-active'); btnAgenda.classList.add('text-gray-400');
+                btnTasks.style.color = '#3b82f6'; btnAgenda.style.color = 'var(--text-muted)';
             }
         }
 
         function renderStats() {
-            const today = DAYS_FULL[new Date().getDay() === 0 ? 0 : new Date().getDay()];
+            const today = getCurrentDayName();
             const pEl = document.getElementById('pending-count'); if(pEl) pEl.textContent = state.todos.filter(t => !t.completed).length;
             const cEl = document.getElementById('completed-count'); if(cEl) cEl.textContent = state.todos.filter(t => t.completed).length;
             const tEl = document.getElementById('today-events-count'); if(tEl) tEl.textContent = state.schedule.filter(s => s.day === today).length;
@@ -380,18 +503,23 @@
         }
 
         function renderDays() {
-            const now = new Date(); const currentDay = now.getDay(); const diff = now.getDate() - currentDay + (currentDay === 0 ? -6 : 1); const monday = new Date(now.setDate(diff));
+            const now = getNowInTimezone(); 
+            const currentDayNum = now.getDay(); 
+            const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); 
+            const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff));
+            const todayString = now.toDateString();
             let html = '';
             for(let i=0; i<7; i++) {
                 let d = new Date(monday); d.setDate(monday.getDate() + i);
-                const isSel = i === state.currentDayIndex; const isToday = new Date().toDateString() === d.toDateString();
+                const isSel = i === state.currentDayIndex; const isToday = d.toDateString() === todayString; 
                 const dayNameShort = DAYS_FULL[d.getDay() === 0 ? 0 : d.getDay()].substring(0,3);
-                html += `<button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${isSel ? 'bg-white shadow-md text-blue-600 scale-105' : 'bg-transparent text-gray-400'}"><span class="text-[10px] font-bold uppercase">${dayNameShort}</span><span class="text-lg font-bold ${isToday && !isSel ? 'text-blue-500' : ''}">${d.getDate()}</span>${isToday ? '<span class="w-1 h-1 bg-blue-500 rounded-full mt-1"></span>' : ''}</button>`;
+                html += `<button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${isSel ? 'bg-white dark:bg-gray-700 shadow-md text-blue-600 dark:text-blue-400 scale-105' : 'bg-transparent text-gray-400 dark:text-gray-500'}"><span class="text-[10px] font-bold uppercase">${dayNameShort}</span><span class="text-lg font-bold ${isToday && !isSel ? 'text-blue-500' : ''}">${d.getDate()}</span>${isToday ? '<span class="w-1 h-1 bg-blue-500 rounded-full mt-1"></span>' : ''}</button>`;
             }
             document.getElementById('day-selector').innerHTML = html;
         }
 
         function setDay(i) { state.currentDayIndex = i; render(); }
+        function goToToday() { const now = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; setDay(dayIndex); }
 
         function renderSchedule() {
             const list = document.getElementById('schedule-list');
@@ -399,39 +527,23 @@
             const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex);
             const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
             const items = state.schedule.filter(s => s.day === dayName).sort((a,b)=>a.time.localeCompare(b.time));
-            
             if(items.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-400"><i data-lucide="coffee" class="w-12 h-12 mb-2 opacity-50"></i><p class="text-sm">Nada para el ${dayName}</p></div>`; return; }
             list.innerHTML = items.map(item => {
                 const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
                 const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
-                // Agregado botón de eliminar con stopPropagation para que no abra el modal de editar
-                return `<div class="bg-white p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')">
-                    <div class="flex flex-col items-center w-12 border-r border-gray-100 pr-2 pt-1"><span class="font-bold text-gray-700 text-sm">${item.time}</span></div>
-                    <div class="flex-1 min-w-0 pr-8">
-                        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${cat.name}</span></div>
-                        <h3 class="font-bold text-gray-800 truncate text-lg">${item.title}</h3>
-                        ${item.desc ? `<p class="text-sm text-gray-500 truncate">${item.desc}</p>` : ''}
-                    </div>
-                    <button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>`;
+                return `<div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-200 dark:border-gray-700 pr-2 pt-1"><span class="font-bold text-sm" style="color: var(--text-main);">${item.time}</span></div><div class="flex-1 min-w-0 pr-8"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">${cat.name}</span></div><h3 class="font-bold truncate text-lg" style="color: var(--text-main);">${item.title}</h3>${item.desc ? `<p class="text-sm truncate" style="color: var(--text-muted);">${item.desc}</p>` : ''}</div><button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             }).join('');
         }
 
         function renderTodos() {
             const list = document.getElementById('todo-list');
             const items = state.todos.sort((a,b) => a.completed - b.completed);
-            if(items.length === 0) { list.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm">Sin tareas pendientes</div>'; return; }
+            if(items.length === 0) { list.innerHTML = '<div class="p-8 text-center text-sm" style="color: var(--text-muted);">Sin tareas pendientes</div>'; return; }
             list.innerHTML = items.map(item => {
                 const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
                 const bgClass = COLORS[cat.color] || 'bg-gray-100 text-gray-500';
-                return `<div class="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-gray-50 transition border-b border-gray-50 last:border-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium text-gray-800 ${item.completed?'line-through text-gray-400':''} truncate text-base">${item.text}</p><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="text-gray-300 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
+                return `<div class="flex items-center gap-3 p-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through text-gray-400':''}" style="color: ${item.completed ? 'var(--text-muted)' : 'var(--text-main)'};" class="truncate text-base">${item.text}</p><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="text-gray-300 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
             }).join('');
-        }
-
-        function updateClock() {
-            const now = new Date();
-            const timeEl = document.getElementById('live-clock'); if(timeEl) timeEl.textContent = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-            const dateEl = document.getElementById('live-date-full'); if(dateEl) dateEl.textContent = now.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         }
 
         // --- AUTH & SYNC ---
@@ -470,6 +582,7 @@
                     state.schedule = remoteData.schedule || [];
                     state.todos = remoteData.todos || [];
                     state.categories = remoteData.categories || state.categories;
+                    if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
                     render();
                     if(!firstLoad) showToast('Datos actualizados', 'Nube');
                 } else if(!doc.exists && (state.schedule.length > 0 || state.todos.length > 0)) { saveDataToCloud(); }
@@ -480,7 +593,6 @@
         function loginWithGoogle() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p); }
         function logout() { auth.signOut(); }
 
-        // --- CORE & HELPERS ---
         async function saveData() {
             localStorage.setItem('myDayOS_v3', JSON.stringify(state));
             renderStats();
@@ -494,17 +606,35 @@
             saveTimeout = setTimeout(async () => {
                 try {
                     const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main');
-                    await docRef.set({ schedule: state.schedule, todos: state.todos, categories: state.categories, lastUpdated: new Date() });
+                    await docRef.set({ schedule: state.schedule, todos: state.todos, categories: state.categories, settings: state.settings, lastUpdated: new Date() });
                 } catch(e) { console.error(e); } isSaving = false;
             }, 1000);
+        }
+
+        // --- SETTINGS FUNCTIONS (RESTAURADAS) ---
+        function openSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+            const tzSelect = document.getElementById('timezone-select');
+            if(tzSelect) tzSelect.value = state.settings.timezone || 'system';
+            const bgInput = document.getElementById('bg-url-input');
+            if(bgInput) bgInput.value = state.settings.bgUrl || '';
+            switchSettingsTab('general');
+            renderCategoriesList();
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
         }
 
         function switchSettingsTab(tabId) {
             document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-                if(btn.dataset.tab === tabId) btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
-                else btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
+                if(btn.dataset.tab === tabId) {
+                    btn.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+                } else {
+                    btn.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-blue-400');
+                }
             });
         }
 
@@ -517,12 +647,12 @@
             document.getElementById('modal-title').textContent = id ? 'Editar' : 'Nuevo';
             const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
             const days = DAYS_FULL.map(d=>`<option value="${d}" ${(data&&data.day===d)||(!data&&DAYS_FULL[new Date().getDay()===0?0:new Date().getDay()]===d)?'selected':''}>${d}</option>`).join('');
-            const inputClass = "w-full px-4 py-2.5 rounded-xl bg-gray-50 border-gray-100 border focus:border-blue-500 outline-none";
+            const inputClass = "w-full px-4 py-2.5 rounded-xl theme-input border outline-none transition-colors";
 
             if(type === 'schedule') {
-                fields.innerHTML = `<div><label class="text-xs font-bold text-gray-500 uppercase">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div><div class="grid grid-cols-2 gap-4"><div><label class="text-xs font-bold text-gray-500 uppercase">Día</label><select name="day" class="${inputClass}">${days}</select></div><div><label class="text-xs font-bold text-gray-500 uppercase">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="${inputClass}"></div></div><div><label class="text-xs font-bold text-gray-500 uppercase">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div><div><label class="text-xs font-bold text-gray-500 uppercase">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>`;
+                fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div><div class="grid grid-cols-2 gap-4"><div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Día</label><select name="day" class="${inputClass}">${days}</select></div><div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="${inputClass}"></div></div><div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div><div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>`;
             } else {
-                fields.innerHTML = `<div><label class="text-xs font-bold text-gray-500 uppercase">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}"></div><div><label class="text-xs font-bold text-gray-500 uppercase">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>`;
+                fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}"></div><div><label class="text-xs font-bold uppercase mb-1" style="color:var(--text-muted)">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>`;
             }
             modal.classList.remove('hidden'); setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.add('md:scale-100', 'translate-y-0'); content.classList.remove('translate-y-full', 'opacity-0', 'md:scale-95'); }, 10);
         }
@@ -545,16 +675,19 @@
             saveData(); closeModal(); render();
         }
 
-        function deleteItem(type, id) { if(confirm('¿Eliminar?')) { if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); else state.todos=state.todos.filter(i=>i.id!==id); saveData(); render(); } }
+        function deleteItem(type, id) { if(confirm('¿Eliminar elemento?')) { if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); else state.todos=state.todos.filter(i=>i.id!==id); saveData(); renderApp(); } }
         function toggleTodo(id) { const t = state.todos.find(i=>i.id===id); if(t) { t.completed = !t.completed; saveData(); render(); } }
         function handleAddCategory(e) { e.preventDefault(); const fd = new FormData(e.target); state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); saveData(); renderCategoriesList(); e.target.reset(); }
         function deleteCategory(id) { if(state.categories.length>1 && confirm('¿Borrar?')) { state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); } }
-        function renderCategoriesList() { document.getElementById('categories-list').innerHTML = state.categories.map(c => `<div class="flex justify-between p-2 bg-gray-50 rounded mb-1"><span class="text-sm ${COLORS[c.color].split(' ')[1]} font-bold">${c.name}</span><button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
+        function renderCategoriesList() { document.getElementById('categories-list').innerHTML = state.categories.map(c => `<div class="flex justify-between p-2 theme-card rounded-lg items-center"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-${c.color}-500"></div><span class="text-sm font-medium" style="color:var(--text-main)">${c.name}</span></div><button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
 
         // --- NOTIFICACIONES ---
         function checkNotifications() {
-            const now = new Date(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`; const currentDayName = DAYS_FULL[now.getDay()]; 
+            const now = getNowInTimezone();
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+            const currentDayName = DAYS_FULL[now.getDay()]; 
             const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime);
             events.forEach(event => {
                 showToast(`Es hora: ${event.title}`, 'Recordatorio');
@@ -579,20 +712,15 @@
             const c = document.getElementById('toast-container'); const t = document.createElement('div');
             t.className = 'toast-notification p-4 flex gap-3 items-start bg-white/90 shadow-lg border border-blue-100 rounded-xl cursor-pointer';
             t.onclick = () => t.remove();
-            t.innerHTML = `<div class="bg-blue-100 p-2 rounded-full text-blue-600"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold text-gray-800">${title}</h4><p class="text-xs text-gray-600 mt-1">${msg}</p></div>`;
+            t.innerHTML = `<div class="bg-blue-100 p-2 rounded-full text-blue-600"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold">${title}</h4><p class="text-xs opacity-80">${msg}</p></div>`;
             c.appendChild(t); lucide.createIcons(); setTimeout(() => { t.style.animation = 'slideInRight 0.4s reverse forwards'; setTimeout(()=>t.remove(), 400); }, 5000);
         }
 
-        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('bg-url-input').value = state.settings.bgUrl; switchSettingsTab('general'); renderCategoriesList(); }
-        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-        function saveBackground() { const url = document.getElementById('bg-url-input').value; if(url) { state.settings.bgUrl = url; saveData(); applySettings(); showToast("Fondo actualizado", "Personalización"); } }
-        function setPresetBg(type) { 
-            const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1200'};
-            state.settings.bgUrl = type==='white' ? '' : urls[type]; saveData(); applySettings(); 
-        }
         function applySettings() {
             if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`; else document.body.style.backgroundImage = 'none';
             const t = document.getElementById('browser-notify-toggle'); if(t) t.checked = state.settings.browserNotifications;
+            const tzSelect = document.getElementById('timezone-select');
+            if(tzSelect) tzSelect.value = state.settings.timezone || 'system';
         }
         
         function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state)); a.download = "myday_backup.json"; a.click(); }
