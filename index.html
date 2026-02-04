@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyDay OS 3.0 - Cloud Sync</title>
+    <title>MyDay OS 3.0 - Google Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Firebase SDKs (Compatibles con HTML directo) -->
@@ -119,6 +119,10 @@
                 <div id="sync-status-indicator" class="sync-badge sync-offline" title="Estado de Sincronización">
                     <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
                     Local
+                </div>
+                <!-- Avatar de Usuario -->
+                <div id="user-avatar" class="hidden w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold overflow-hidden">
+                    <img id="user-photo" src="" alt="User" class="w-full h-full object-cover">
                 </div>
                 <button onclick="openSettings()" class="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-md hover:bg-white/50" title="Configuración">
                     <i data-lucide="settings-2" class="w-4 h-4"></i>
@@ -278,7 +282,7 @@
                         <i data-lucide="layout" class="w-4 h-4 inline mr-2"></i> General
                     </button>
                     <button onclick="switchSettingsTab('cloud')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition text-blue-600" data-tab="cloud">
-                        <i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i> Nube / Sync
+                        <i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i> Nube Google
                     </button>
                     <button onclick="switchSettingsTab('categories')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition" data-tab="categories">
                         <i data-lucide="tags" class="w-4 h-4 inline mr-2"></i> Categorías
@@ -321,29 +325,39 @@
                     <!-- TAB: Cloud / Sync -->
                     <div id="tab-cloud" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                            <i data-lucide="cloud" class="w-5 h-5 text-blue-600"></i> Sincronización
+                            <i data-lucide="cloud" class="w-5 h-5 text-blue-600"></i> Sincronización Google
                         </h2>
                         <div class="space-y-4">
                             <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
                                 <p class="text-sm text-blue-800 mb-2">
-                                    Para sincronizar tus datos entre dispositivos (PC, Celular), ingresa una <strong>Clave Secreta</strong>. Usa la misma clave en todos tus dispositivos.
+                                    Sincroniza tus datos en todos tus dispositivos usando tu cuenta de Google.
+                                </p>
+                                <p class="text-xs text-blue-600 font-medium">
+                                    Requiere habilitar "Google" en Firebase Console > Authentication.
                                 </p>
                             </div>
                             
-                            <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-1">ID / Clave de Sincronización</label>
-                                <div class="flex gap-2">
-                                    <input type="text" id="sync-id-input" class="flex-1 border rounded-lg px-3 py-2 text-sm font-mono tracking-wider" placeholder="ej: mi-agenda-secreta-2024">
-                                    <button onclick="connectSync()" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm hover:bg-black transition shadow-lg">Conectar</button>
+                            <div id="auth-section" class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
+                                <button onclick="loginWithGoogle()" class="flex items-center gap-3 bg-white text-gray-700 px-6 py-3 rounded-full shadow-md hover:shadow-lg transition border border-gray-200 font-medium">
+                                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                                    Iniciar sesión con Google
+                                </button>
+                            </div>
+
+                            <div id="user-profile" class="hidden flex items-center gap-4 p-4 bg-white border rounded-xl shadow-sm">
+                                <img id="profile-pic" src="" class="w-12 h-12 rounded-full bg-gray-200">
+                                <div class="flex-1">
+                                    <h4 id="profile-name" class="font-bold text-gray-800">Usuario</h4>
+                                    <p id="profile-email" class="text-xs text-gray-500">correo@ejemplo.com</p>
                                 </div>
-                                <p class="text-xs text-gray-400 mt-2">Nota: Cualquiera con esta clave puede ver tus datos. Usa algo único y complejo.</p>
+                                <button onclick="logout()" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm font-medium">Salir</button>
                             </div>
 
                             <div id="sync-active-message" class="hidden p-3 bg-green-50 text-green-700 rounded-lg text-sm border border-green-100 flex items-center gap-2">
-                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Conectado a la nube.
+                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Tus datos se guardan en tu cuenta.
                             </div>
                             <div id="sync-error-message" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100 flex items-center gap-2">
-                                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Nube no disponible (Modo Local).
+                                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Error de configuración Firebase.
                             </div>
                         </div>
                     </div>
@@ -443,37 +457,35 @@
         try {
             let configToUse = null;
 
-            // Prioridad 1: Configuración del usuario (para GitHub Pages / Hosting propio)
+            // Prioridad 1: Configuración del usuario
             if (USER_FIREBASE_CONFIG) {
                 configToUse = USER_FIREBASE_CONFIG;
                 console.log("MyDay OS: Usando configuración personalizada de Firebase.");
             } 
-            // Prioridad 2: Configuración del entorno (para el editor/preview actual)
+            // Prioridad 2: Configuración del entorno
             else if (typeof __firebase_config !== 'undefined') {
                 configToUse = JSON.parse(__firebase_config);
             }
 
             if (configToUse) {
-                // Prevenir reinicialización si ya existe
                 if (!firebase.apps.length) {
                     firebase.initializeApp(configToUse);
                 } else {
-                    firebase.app(); // Usar la existente
+                    firebase.app(); 
                 }
                 
                 auth = firebase.auth();
                 db = firebase.firestore();
                 
-                // Si es config de usuario, usamos un ID fijo para simplificar
+                // Usamos el ID del proyecto si es config de usuario
                 if (USER_FIREBASE_CONFIG) {
-                    appId = 'myday-os-user-default';
+                    appId = USER_FIREBASE_CONFIG.projectId;
                 } else {
                     appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
                 }
                 
                 isCloudAvailable = true;
                 
-                // Actualizar UI
                 document.getElementById('sync-status-indicator').classList.remove('sync-disabled');
                 document.getElementById('sync-error-message').classList.add('hidden');
                 
@@ -515,76 +527,89 @@
             todos: [],
             settings: {
                 bgUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
-                browserNotifications: false,
-                syncId: null // ID para sincronización
+                browserNotifications: false
             }
         };
 
         let unsubscribeSnapshot = null;
         let isSaving = false;
+        let currentUser = null;
 
-        // --- AUTH INIT ---
-        const initAuth = async () => {
-            if (!isCloudAvailable) return;
-            
-            try {
-                // Si hay config de usuario, siempre usamos login anónimo
-                if (USER_FIREBASE_CONFIG) {
-                     await auth.signInAnonymously();
-                } 
-                // Si estamos en el entorno de preview (chat)
-                else if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await auth.signInWithCustomToken(__initial_auth_token);
+        // --- AUTH & SYNC LOGIC ---
+        function loginWithGoogle() {
+            if (!isCloudAvailable) return alert("Firebase no configurado.");
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(error => {
+                console.error(error);
+                alert("Error al iniciar sesión: " + error.message + "\n\nRecuerda habilitar 'Google' en la consola de Firebase > Authentication.");
+            });
+        }
+
+        function logout() {
+            if(auth) auth.signOut();
+        }
+
+        // Observer Auth State
+        if (isCloudAvailable) {
+            auth.onAuthStateChanged((user) => {
+                currentUser = user;
+                if (user) {
+                    // UI Logueado
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('user-profile').classList.remove('hidden');
+                    document.getElementById('user-profile').classList.add('flex');
+                    document.getElementById('profile-name').textContent = user.displayName;
+                    document.getElementById('profile-email').textContent = user.email;
+                    document.getElementById('profile-pic').src = user.photoURL;
+                    
+                    document.getElementById('user-avatar').classList.remove('hidden');
+                    document.getElementById('user-photo').src = user.photoURL;
+
+                    document.getElementById('sync-active-message').classList.remove('hidden');
+                    
+                    // Iniciar Sync
+                    activateFirestoreSync(user.uid);
                 } else {
-                    await auth.signInAnonymously();
+                    // UI Deslogueado
+                    document.getElementById('auth-section').classList.remove('hidden');
+                    document.getElementById('user-profile').classList.add('hidden');
+                    document.getElementById('user-profile').classList.remove('flex');
+                    document.getElementById('user-avatar').classList.add('hidden');
+                    document.getElementById('sync-active-message').classList.add('hidden');
+                    
+                    if(unsubscribeSnapshot) unsubscribeSnapshot();
+                    document.getElementById('sync-status-indicator').className = 'sync-badge sync-offline';
+                    document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local';
                 }
-            } catch(e) {
-                console.error("Auth Error:", e);
-                // Fallback a modo local si falla la auth
-                isCloudAvailable = false;
-                document.getElementById('sync-status-indicator').classList.add('sync-disabled');
-                document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Auth Error';
-            }
-        };
-        initAuth();
+            });
+        }
 
-        // --- Sistema de Persistencia (Híbrido) ---
         function initPersistence() {
-            // 1. Cargar LocalStorage primero para inmediatez
             const saved = localStorage.getItem('myDayOS_v3');
             if (saved) {
                 const parsed = JSON.parse(saved);
                 state = { ...state, ...parsed };
-                // Asegurarnos que syncId venga del local si existe
             }
             applySettings();
-            
-            // 2. Si hay SyncID, conectar a Firebase
-            if(state.settings.syncId && isCloudAvailable) {
-                activateFirestoreSync(state.settings.syncId);
-            }
         }
 
-        function activateFirestoreSync(syncId) {
-            if (!isCloudAvailable || !auth.currentUser) return;
+        function activateFirestoreSync(uid) {
+            if (!isCloudAvailable) return;
 
             const statusBadge = document.getElementById('sync-status-indicator');
-            // Estado Cargando Visual
             statusBadge.className = 'sync-badge sync-connecting';
-            statusBadge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div> Conectando...`;
+            statusBadge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div> Syncing...`;
 
-            if(unsubscribeSnapshot) unsubscribeSnapshot(); // Limpiar anterior
+            if(unsubscribeSnapshot) unsubscribeSnapshot();
 
-            // Referencia al documento público compartido (por ID)
-            const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('sync_sessions').doc(syncId);
+            // RUTA DE DATOS USUARIO
+            const docRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('data').doc('main');
 
             let firstLoad = true;
 
             unsubscribeSnapshot = docRef.onSnapshot((doc) => {
-                // Estado Éxito Visual
                 statusBadge.className = 'sync-badge sync-active';
                 statusBadge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-current"></div> En línea`;
-                statusBadge.title = `Sincronizado con ID: ${syncId}`;
 
                 if(doc.exists && !isSaving) {
                     const remoteData = doc.data();
@@ -595,11 +620,9 @@
                     renderApp();
                     updateStats();
                     
-                    // Notificar solo si no es la carga inicial para no molestar
-                    if(!firstLoad) {
-                        showToast('Datos actualizados desde la nube', 'Sincronización');
-                    }
-                } else if (!doc.exists && state.schedule.length > 0) {
+                    if(!firstLoad) showToast('Datos actualizados', 'Nube');
+                } else if (!doc.exists && (state.schedule.length > 0 || state.todos.length > 0)) {
+                    // Subir datos locales si no existen en nube
                     saveDataToCloud(); 
                 }
                 firstLoad = false;
@@ -607,32 +630,28 @@
                 console.error("Error sync:", error);
                 statusBadge.className = 'sync-badge sync-disabled';
                 statusBadge.innerHTML = `<i data-lucide="wifi-off" class="w-3 h-3 mr-1"></i> Error`;
-                statusBadge.title = 'Error de conexión';
-                showToast('No se pudo conectar a la nube', 'Error');
-                lucide.createIcons();
+                // Si falla por permisos, es probable que Rules bloqueen. 
+                // Pero Firestore por defecto en modo test permite todo por 30 días.
             });
         }
 
         async function saveData() {
-            // Guardar en LocalStorage siempre (backup local)
             localStorage.setItem('myDayOS_v3', JSON.stringify(state));
             updateStats();
-
-            // Guardar en Nube si está activo
-            if(isCloudAvailable && state.settings.syncId && auth.currentUser) {
+            if(isCloudAvailable && currentUser) {
                 saveDataToCloud();
             }
         }
 
-        // Debounce para no saturar escrituras
         let saveTimeout;
         function saveDataToCloud() {
-            if (!isCloudAvailable) return;
+            if (!isCloudAvailable || !currentUser) return;
             clearTimeout(saveTimeout);
             isSaving = true;
+            
             saveTimeout = setTimeout(async () => {
                 try {
-                    const docRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('sync_sessions').doc(state.settings.syncId);
+                    const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main');
                     await docRef.set({
                         schedule: state.schedule,
                         todos: state.todos,
@@ -644,31 +663,9 @@
             }, 1000);
         }
 
-        function connectSync() {
-            if (!isCloudAvailable) {
-                alert("Para activar la nube en GitHub Pages, debes editar el archivo HTML y agregar tu configuración de Firebase en la variable 'USER_FIREBASE_CONFIG' (líneas 370 aprox).");
-                return;
-            }
-            
-            const input = document.getElementById('sync-id-input').value.trim();
-            if(input.length < 3) return alert("El ID debe tener al menos 3 caracteres");
-            
-            state.settings.syncId = input;
-            saveData(); // Guarda el ID en local
-            
-            document.getElementById('sync-active-message').classList.remove('hidden');
-            activateFirestoreSync(input);
-        }
-
         function applySettings() {
             document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`;
             document.getElementById('browser-notify-toggle').checked = state.settings.browserNotifications;
-            if(state.settings.syncId) {
-                document.getElementById('sync-id-input').value = state.settings.syncId;
-                if (isCloudAvailable) {
-                     document.getElementById('sync-active-message').classList.remove('hidden');
-                }
-            }
         }
 
         // --- Helpers de Fecha Real ---
@@ -690,17 +687,7 @@
 
         // --- Renderizado Principal ---
         function init() {
-            // Inicialización de la persistencia
-            // Si la nube está disponible, esperamos al usuario
-            if (isCloudAvailable) {
-                auth.onAuthStateChanged((user) => {
-                    if(user) initPersistence(); 
-                });
-            } else {
-                // Si no, iniciamos persistencia local inmediatamente
-                initPersistence();
-            }
-            
+            initPersistence();
             renderDaySelector();
             renderApp();
             setInterval(updateClock, 1000);
