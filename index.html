@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f3f4f6">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Favicon agregado -->
+    <link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg" type="image/svg+xml">
     <title>MyDay OS 3.0 - Google Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -249,15 +251,29 @@
                 <div class="flex-1 p-6 md:p-8 overflow-y-auto relative">
                     <button onclick="closeSettings()" class="hidden md:block absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
                     
-                    <!-- Pestañas -->
+                    <!-- Pestaña General Rediseñada -->
                     <div id="tab-general" class="settings-content block">
-                        <h2 class="text-xl font-bold mb-4">Fondo</h2>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div onclick="setPresetBg('nature')" class="aspect-square bg-gray-200 rounded-lg bg-cover cursor-pointer" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200')"></div>
-                            <div onclick="setPresetBg('dark')" class="aspect-square bg-gray-800 rounded-lg bg-cover cursor-pointer" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200')"></div>
-                            <div onclick="setPresetBg('white')" class="aspect-square bg-white border rounded-lg flex items-center justify-center text-xs text-gray-500 cursor-pointer">Limpiar</div>
+                        <h2 class="text-xl font-bold mb-4">Personalización</h2>
+                        
+                        <!-- URL Input Primero -->
+                        <div class="mb-6">
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Imagen Personalizada (URL)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="bg-url-input" class="flex-1 bg-gray-100 border-none rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder-gray-400" placeholder="https://...">
+                                <button onclick="saveBackground()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm">Aplicar</button>
+                            </div>
                         </div>
-                        <div class="mt-4"><label class="text-xs font-bold text-gray-500 uppercase">URL Personalizada</label><div class="flex gap-2 mt-1"><input type="text" id="bg-url-input" class="flex-1 border rounded-lg px-3 py-2 text-sm"><button onclick="saveBackground()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">OK</button></div></div>
+
+                        <!-- Presets en Círculos -->
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Fondos Predeterminados</label>
+                            <div class="flex gap-3 flex-wrap">
+                                <button onclick="setPresetBg('nature')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200')" title="Naturaleza"></button>
+                                <button onclick="setPresetBg('dark')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200')" title="Oscuro"></button>
+                                <button onclick="setPresetBg('abstract')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200')" title="Abstracto"></button>
+                                <button onclick="setPresetBg('white')" class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-all shadow-sm transform hover:scale-105" title="Limpiar Fondo"><i data-lucide="ban" class="w-5 h-5"></i></button>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="tab-cloud" class="settings-content hidden">
@@ -388,7 +404,16 @@
             list.innerHTML = items.map(item => {
                 const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
                 const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
-                return `<div class="bg-white p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-100 pr-2 pt-1"><span class="font-bold text-gray-700 text-sm">${item.time}</span></div><div class="flex-1 min-w-0"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${cat.name}</span></div><h3 class="font-bold text-gray-800 truncate text-lg">${item.title}</h3>${item.desc ? `<p class="text-sm text-gray-500 truncate">${item.desc}</p>` : ''}</div></div>`;
+                // Agregado botón de eliminar con stopPropagation para que no abra el modal de editar
+                return `<div class="bg-white p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')">
+                    <div class="flex flex-col items-center w-12 border-r border-gray-100 pr-2 pt-1"><span class="font-bold text-gray-700 text-sm">${item.time}</span></div>
+                    <div class="flex-1 min-w-0 pr-8">
+                        <div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${cat.name}</span></div>
+                        <h3 class="font-bold text-gray-800 truncate text-lg">${item.title}</h3>
+                        ${item.desc ? `<p class="text-sm text-gray-500 truncate">${item.desc}</p>` : ''}
+                    </div>
+                    <button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
             }).join('');
         }
 
