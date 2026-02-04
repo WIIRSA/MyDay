@@ -6,10 +6,10 @@
     <title>MyDay OS 3.0 - Cloud Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+    <!-- Firebase SDKs (Compatibles con HTML directo) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         /* Tipografía estilo Apple */
         body {
@@ -418,26 +418,73 @@
     </main>
 
     <script>
+        // =============================================================================
+        //  CONFIGURACIÓN PARA GITHUB PAGES / HOSTING PROPIO
+        //  Aquí están tus datos integrados automáticamente.
+        // =============================================================================
+        
+        const USER_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyDF3lcFQMX9_wvDpoQjWcT0d4aLeK1dwJ0",
+            authDomain: "myday-3f736.firebaseapp.com",
+            projectId: "myday-3f736",
+            storageBucket: "myday-3f736.firebasestorage.app",
+            messagingSenderId: "245410649722",
+            appId: "1:245410649722:web:fe36ccf0d600e8bbfd0dc3"
+        };
+        
+        // =============================================================================
+
         // --- FIREBASE SETUP & SAFEGUARDS ---
         let auth, db, appId;
         let isCloudAvailable = false;
 
         try {
-            if (typeof __firebase_config !== 'undefined') {
-                const firebaseConfig = JSON.parse(__firebase_config);
-                const app = firebase.initializeApp(firebaseConfig);
+            let configToUse = null;
+
+            // Prioridad 1: Configuración del usuario (para GitHub Pages / Hosting propio)
+            if (USER_FIREBASE_CONFIG) {
+                configToUse = USER_FIREBASE_CONFIG;
+                console.log("MyDay OS: Usando configuración personalizada de Firebase.");
+            } 
+            // Prioridad 2: Configuración del entorno (para el editor/preview actual)
+            else if (typeof __firebase_config !== 'undefined') {
+                configToUse = JSON.parse(__firebase_config);
+            }
+
+            if (configToUse) {
+                // Prevenir reinicialización si ya existe
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(configToUse);
+                } else {
+                    firebase.app(); // Usar la existente
+                }
+                
                 auth = firebase.auth();
                 db = firebase.firestore();
-                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                
+                // Si es config de usuario, usamos un ID fijo para simplificar
+                if (USER_FIREBASE_CONFIG) {
+                    appId = 'myday-os-user-default';
+                } else {
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                }
+                
                 isCloudAvailable = true;
+                
+                // Actualizar UI
+                document.getElementById('sync-status-indicator').classList.remove('sync-disabled');
+                document.getElementById('sync-error-message').classList.add('hidden');
+                
             } else {
-                console.warn("MyDay OS: Modo Local activado. Firebase no configurado en este entorno.");
-                document.getElementById('sync-status-indicator').classList.add('sync-disabled');
-                document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Offline';
-                document.getElementById('sync-error-message').classList.remove('hidden');
+                throw new Error("No config found");
             }
+
         } catch (e) {
-            console.error("MyDay OS: Error inicializando Firebase:", e);
+            console.warn("MyDay OS: Modo Local activado. Firebase no configurado.", e);
+            document.getElementById('sync-status-indicator').classList.add('sync-disabled');
+            document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Offline';
+            document.getElementById('sync-error-message').classList.remove('hidden');
+            isCloudAvailable = false;
         }
 
         // --- Configuración Global ---
@@ -479,14 +526,22 @@
             if (!isCloudAvailable) return;
             
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                // Si hay config de usuario, siempre usamos login anónimo
+                if (USER_FIREBASE_CONFIG) {
+                     await auth.signInAnonymously();
+                } 
+                // Si estamos en el entorno de preview (chat)
+                else if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await auth.signInWithCustomToken(__initial_auth_token);
                 } else {
                     await auth.signInAnonymously();
                 }
             } catch(e) {
                 console.error("Auth Error:", e);
+                // Fallback a modo local si falla la auth
                 isCloudAvailable = false;
+                document.getElementById('sync-status-indicator').classList.add('sync-disabled');
+                document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Auth Error';
             }
         };
         initAuth();
@@ -575,7 +630,7 @@
 
         function connectSync() {
             if (!isCloudAvailable) {
-                alert("La sincronización no está disponible porque Firebase no está configurado en este entorno (ej. ejecutando localmente). Tus datos se guardarán solo en este navegador.");
+                alert("Para activar la nube en GitHub Pages, debes editar el archivo HTML y agregar tu configuración de Firebase en la variable 'USER_FIREBASE_CONFIG' (líneas 370 aprox).");
                 return;
             }
             
