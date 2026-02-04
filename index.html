@@ -844,13 +844,33 @@
 
         function checkNotifications() {
             const now = new Date();
-            const currentDayName = DAYS_FULL[now.getDay() === 0 ? 0 : now.getDay()]; 
-            const currentTime = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+            // Asegurar formato HH:MM (ej. 09:05) para coincidir con el input type="time"
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+            
+            // Mapeo correcto de días (Domingo = 0 en JS)
+            const currentDayName = DAYS_FULL[now.getDay()]; 
+
+            // Filtrar eventos que coincidan con día y hora actuales
             const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime);
+
             events.forEach(event => {
-                showToast(`Es hora de: ${event.title}`, 'Evento');
+                // 1. Notificación Visual (Toast) dentro de la app
+                showToast(`Es hora de: ${event.title}`, 'Recordatorio');
+                
+                // 2. Notificación del Navegador (Funciona en segundo plano)
                 if (state.settings.browserNotifications && Notification.permission === "granted") {
-                    new Notification("MyDay OS", { body: `Es hora de: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg" });
+                    try {
+                        new Notification("MyDay OS 🔔", { 
+                            body: `Es hora de tu evento: ${event.title}\n${event.desc || ''}`, 
+                            icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-clock.svg",
+                            tag: `event-${event.id}`, // Evita duplicados
+                            requireInteraction: true // Se mantiene visible en móvil
+                        });
+                    } catch (e) {
+                        console.log("Error al enviar notificación nativa:", e);
+                    }
                 }
             });
         }
@@ -858,39 +878,78 @@
         function showToast(message, title = 'Notificación') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = 'toast-notification p-4 flex gap-3 items-start pointer-events-auto cursor-pointer hover:bg-white transition-colors';
+            toast.className = 'toast-notification p-4 flex gap-3 items-start pointer-events-auto cursor-pointer hover:bg-white transition-colors border border-blue-100 shadow-xl';
             toast.onclick = () => toast.remove();
             toast.innerHTML = `
                 <div class="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div>
                 <div class="flex-1"><h4 class="text-sm font-bold text-gray-800">${title}</h4><p class="text-xs text-gray-600 mt-1">${message}</p></div>`;
             container.appendChild(toast);
             lucide.createIcons();
-            setTimeout(() => { toast.style.animation = 'slideOutRight 0.4s forwards'; setTimeout(() => toast.remove(), 400); }, 5000);
+            
+            // Sonido suave de notificación (opcional, usa un beep base64 muy corto)
+            // const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); 
+            // audio.play().catch(e => {}); 
+
+            setTimeout(() => { 
+                toast.style.animation = 'slideOutRight 0.4s forwards'; 
+                setTimeout(() => toast.remove(), 400); 
+            }, 6000);
         }
 
         function toggleBrowserNotifications() {
             const checkbox = document.getElementById('browser-notify-toggle');
-            state.settings.browserNotifications = checkbox.checked;
-            saveData();
-            if (checkbox.checked && Notification.permission !== "granted") {
-                Notification.requestPermission().then(permission => {
-                    if (permission !== "granted") {
-                        alert("Permiso denegado");
-                        checkbox.checked = false;
-                        state.settings.browserNotifications = false;
-                        saveData();
-                    }
-                });
+            
+            if (checkbox.checked) {
+                // Solicitar permiso
+                if (!("Notification" in window)) {
+                    alert("Tu navegador no soporta notificaciones de escritorio.");
+                    checkbox.checked = false;
+                    return;
+                }
+
+                if (Notification.permission === "granted") {
+                    state.settings.browserNotifications = true;
+                    saveData();
+                    new Notification("MyDay OS", { body: "¡Notificaciones activadas correctamente!", icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/check-circle.svg" });
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === "granted") {
+                            state.settings.browserNotifications = true;
+                            saveData();
+                            new Notification("MyDay OS", { body: "¡Gracias! Te avisaremos de tus eventos.", icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/check-circle.svg" });
+                        } else {
+                            checkbox.checked = false;
+                            state.settings.browserNotifications = false;
+                            saveData();
+                            alert("Permiso denegado. Para activar, cambia la configuración de permisos en la barra de dirección de tu navegador.");
+                        }
+                    });
+                } else {
+                    // Si ya estaba denegado
+                    alert("Las notificaciones están bloqueadas por el navegador. Debes habilitarlas manualmente en la configuración del sitio (icono de candado junto a la URL).");
+                    checkbox.checked = false;
+                    state.settings.browserNotifications = false;
+                    saveData();
+                }
+            } else {
+                state.settings.browserNotifications = false;
+                saveData();
             }
         }
 
-        function switchSettingsTab(tabId) {
-            document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
-                if(btn.dataset.tab === tabId) btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
-            });
+        function applySettings() {
+            document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`;
+            
+            // Sincronizar estado visual con permiso real
+            const hasPermission = Notification.permission === "granted";
+            // Si el usuario revocó permiso en el navegador, actualizamos el estado interno
+            if (state.settings.browserNotifications && !hasPermission) {
+                state.settings.browserNotifications = false;
+                saveData();
+            }
+            
+            const toggle = document.getElementById('browser-notify-toggle');
+            if(toggle) toggle.checked = state.settings.browserNotifications;
         }
 
         function saveBackground() {
