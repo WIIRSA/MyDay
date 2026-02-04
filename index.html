@@ -92,6 +92,7 @@
         }
         .sync-active { background-color: #dcfce7; color: #166534; }
         .sync-offline { background-color: #f3f4f6; color: #6b7280; }
+        .sync-disabled { background-color: #fee2e2; color: #991b1b; }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white" id="app-body">
@@ -339,6 +340,9 @@
                             <div id="sync-active-message" class="hidden p-3 bg-green-50 text-green-700 rounded-lg text-sm border border-green-100 flex items-center gap-2">
                                 <i data-lucide="check-circle-2" class="w-4 h-4"></i> Conectado a la nube.
                             </div>
+                            <div id="sync-error-message" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100 flex items-center gap-2">
+                                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Nube no disponible (Modo Local).
+                            </div>
                         </div>
                     </div>
 
@@ -414,13 +418,27 @@
     </main>
 
     <script>
-        // --- FIREBASE SETUP ---
-        // Configuración por defecto (inyectada por el entorno)
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // --- FIREBASE SETUP & SAFEGUARDS ---
+        let auth, db, appId;
+        let isCloudAvailable = false;
+
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = firebase.initializeApp(firebaseConfig);
+                auth = firebase.auth();
+                db = firebase.firestore();
+                appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                isCloudAvailable = true;
+            } else {
+                console.warn("MyDay OS: Modo Local activado. Firebase no configurado en este entorno.");
+                document.getElementById('sync-status-indicator').classList.add('sync-disabled');
+                document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Offline';
+                document.getElementById('sync-error-message').classList.remove('hidden');
+            }
+        } catch (e) {
+            console.error("MyDay OS: Error inicializando Firebase:", e);
+        }
 
         // --- Configuración Global ---
         const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -458,10 +476,17 @@
 
         // --- AUTH INIT ---
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await auth.signInWithCustomToken(__initial_auth_token);
-            } else {
-                await auth.signInAnonymously();
+            if (!isCloudAvailable) return;
+            
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await auth.signInWithCustomToken(__initial_auth_token);
+                } else {
+                    await auth.signInAnonymously();
+                }
+            } catch(e) {
+                console.error("Auth Error:", e);
+                isCloudAvailable = false;
             }
         };
         initAuth();
@@ -478,13 +503,13 @@
             applySettings();
             
             // 2. Si hay SyncID, conectar a Firebase
-            if(state.settings.syncId) {
+            if(state.settings.syncId && isCloudAvailable) {
                 activateFirestoreSync(state.settings.syncId);
             }
         }
 
         function activateFirestoreSync(syncId) {
-            if (!auth.currentUser) return; // Esperar auth
+            if (!isCloudAvailable || !auth.currentUser) return;
 
             const statusBadge = document.getElementById('sync-status-indicator');
             statusBadge.className = 'sync-badge sync-active';
@@ -498,7 +523,7 @@
             unsubscribeSnapshot = docRef.onSnapshot((doc) => {
                 if(doc.exists && !isSaving) {
                     const remoteData = doc.data();
-                    // Merge cuidadoso: Solo reemplazamos schedule, todos y cats. No settings locales como notificaciones
+                    // Merge cuidadoso
                     state.schedule = remoteData.schedule || [];
                     state.todos = remoteData.todos || [];
                     state.categories = remoteData.categories || state.categories;
@@ -523,7 +548,7 @@
             updateStats();
 
             // Guardar en Nube si está activo
-            if(state.settings.syncId && auth.currentUser) {
+            if(isCloudAvailable && state.settings.syncId && auth.currentUser) {
                 saveDataToCloud();
             }
         }
@@ -531,6 +556,7 @@
         // Debounce para no saturar escrituras
         let saveTimeout;
         function saveDataToCloud() {
+            if (!isCloudAvailable) return;
             clearTimeout(saveTimeout);
             isSaving = true;
             saveTimeout = setTimeout(async () => {
@@ -548,6 +574,11 @@
         }
 
         function connectSync() {
+            if (!isCloudAvailable) {
+                alert("La sincronización no está disponible porque Firebase no está configurado en este entorno (ej. ejecutando localmente). Tus datos se guardarán solo en este navegador.");
+                return;
+            }
+            
             const input = document.getElementById('sync-id-input').value.trim();
             if(input.length < 3) return alert("El ID debe tener al menos 3 caracteres");
             
@@ -563,7 +594,9 @@
             document.getElementById('browser-notify-toggle').checked = state.settings.browserNotifications;
             if(state.settings.syncId) {
                 document.getElementById('sync-id-input').value = state.settings.syncId;
-                document.getElementById('sync-active-message').classList.remove('hidden');
+                if (isCloudAvailable) {
+                     document.getElementById('sync-active-message').classList.remove('hidden');
+                }
             }
         }
 
@@ -586,9 +619,16 @@
 
         // --- Renderizado Principal ---
         function init() {
-            auth.onAuthStateChanged((user) => {
-                if(user) initPersistence(); // Iniciar sync solo cuando tengamos usuario
-            });
+            // Inicialización de la persistencia
+            // Si la nube está disponible, esperamos al usuario
+            if (isCloudAvailable) {
+                auth.onAuthStateChanged((user) => {
+                    if(user) initPersistence(); 
+                });
+            } else {
+                // Si no, iniciamos persistencia local inmediatamente
+                initPersistence();
+            }
             
             renderDaySelector();
             renderApp();
@@ -890,7 +930,9 @@
             renderCategoriesList();
             if(state.settings.syncId) {
                 document.getElementById('sync-id-input').value = state.settings.syncId;
-                document.getElementById('sync-active-message').classList.remove('hidden');
+                if (isCloudAvailable) {
+                    document.getElementById('sync-active-message').classList.remove('hidden');
+                }
             }
         }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
