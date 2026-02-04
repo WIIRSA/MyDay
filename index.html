@@ -2,82 +2,86 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyDay OS 3.0 - Google Sync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#f2f2f7">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MyDay OS - Google Sync Mobile</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Firebase SDKs (Compatibles con HTML directo) -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        /* Tipografía estilo Apple */
+        /* Base */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-image 0.5s ease-in-out;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f2f7; /* iOS Gray background */
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
-            background-repeat: no-repeat;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none; /* Prevenir rebote de página completa */
         }
 
-        /* Variables CSS para temas dinámicos */
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --sidebar-bg: rgba(245, 245, 247, 0.6);
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
+        /* Desktop Glass Panel (Solo aplica en pantallas grandes) */
+        @media (min-width: 1024px) {
+            .desktop-glass {
+                background: rgba(255, 255, 255, 0.75);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border-radius: 24px;
+            }
+            body {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
 
-        /* Efecto Glassmorphism Profundo */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.25);
+        /* Mobile Adjustments */
+        @media (max-width: 1023px) {
+            body {
+                padding: 0;
+                background-image: none !important; /* Quitar fondo pesado en móvil */
+                background-color: #F2F2F7;
+            }
+            main {
+                border-radius: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                background: #F2F2F7 !important; /* Color solido app nativa */
+            }
         }
 
-        .glass-sidebar {
-            background: var(--sidebar-bg);
-            backdrop-filter: blur(30px);
-            border-right: 1px solid rgba(0, 0, 0, 0.05);
-        }
+        /* Hide Scrollbar but allow scroll */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Toast de Notificación estilo macOS */
-        .toast-notification {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            border-radius: 14px;
-            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        @keyframes slideInRight {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOutRight {
-            to { transform: translateX(120%); opacity: 0; }
-        }
-
-        /* Scrollbar refinado */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.25); }
-
-        /* Checkbox animado */
+        /* Custom Checkbox */
         .custom-checkbox input:checked + div {
             background-color: #007AFF;
             border-color: #007AFF;
-            transform: scale(1.05);
         }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Mobile View Transitions */
+        .view-transition { transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.3s ease; }
         
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        /* Safe Area for iPhones */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+
+        /* Bottom Nav Active State */
+        .nav-item.active { color: #007AFF; }
+        .nav-item.active svg { stroke-width: 2.5px; }
 
         /* Status de Sincronización */
         .sync-badge {
@@ -97,174 +101,169 @@
         .sync-connecting { background-color: #fef9c3; color: #854d0e; border-color: #fde047; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white" id="app-body">
+<body class="h-[100dvh] w-screen overflow-hidden text-gray-800" id="app-body">
 
-    <!-- Contenedor Principal -->
-    <main class="w-full max-w-7xl h-[92vh] glass-panel rounded-2xl flex flex-col overflow-hidden relative fade-in">
+    <!-- App Container -->
+    <main class="w-full h-full lg:max-w-6xl lg:h-[85vh] desktop-glass flex flex-col overflow-hidden relative fade-in">
         
-        <!-- Header -->
-        <header class="h-14 flex items-center justify-between px-5 border-b border-gray-200/30 bg-white/40 shrink-0 select-none">
-            <div class="flex gap-2">
-                <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E] hover:bg-[#FF5F57]/80 cursor-pointer shadow-sm"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24] hover:bg-[#FEBC2E]/80 cursor-pointer shadow-sm"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29] hover:bg-[#28C840]/80 cursor-pointer shadow-sm"></div>
+        <!-- HEADER (Adaptativo) -->
+        <header class="h-14 lg:h-16 flex items-center justify-between px-4 lg:px-6 bg-white/80 lg:bg-white/40 backdrop-blur-md border-b border-gray-200/50 shrink-0 z-30 pt-safe lg:pt-0">
+            <!-- Desktop Traffic Lights -->
+            <div class="hidden lg:flex gap-2">
+                <div class="w-3 h-3 rounded-full bg-[#FF5F57] border border-[#E0443E]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#FEBC2E] border border-[#D89E24]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#28C840] border border-[#1AAB29]"></div>
             </div>
             
-            <div class="text-sm font-semibold text-gray-600/90 tracking-tight flex items-center gap-2">
-                <i data-lucide="command" class="w-4 h-4"></i>
-                MyDay OS <span class="text-xs opacity-50 font-normal">Cloud Edition</span>
+            <!-- Mobile Title -->
+            <div class="lg:hidden font-bold text-lg text-gray-900 flex items-center gap-2">
+                <span id="mobile-header-title">Agenda</span>
+                <div id="sync-dot" class="w-2 h-2 rounded-full bg-gray-300"></div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <div id="sync-status-indicator" class="sync-badge sync-offline" title="Estado de Sincronización">
+            <!-- Desktop Title -->
+            <div class="hidden lg:flex items-center gap-2 font-semibold text-gray-600">
+                <i data-lucide="layout" class="w-4 h-4"></i> MyDay OS
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-3">
+                <div id="sync-status-indicator" class="hidden lg:flex sync-badge sync-offline" title="Estado de Sincronización">
                     <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
                     Local
                 </div>
-                <!-- Avatar de Usuario -->
-                <div id="user-avatar" class="hidden w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold overflow-hidden">
-                    <img id="user-photo" src="" alt="User" class="w-full h-full object-cover">
-                </div>
-                <button onclick="openSettings()" class="text-gray-500 hover:text-gray-800 transition-colors p-1 rounded-md hover:bg-white/50" title="Configuración">
-                    <i data-lucide="settings-2" class="w-4 h-4"></i>
+                <button onclick="openSettings()" class="p-2 rounded-full hover:bg-gray-200/50 transition-colors">
+                    <i data-lucide="settings-2" class="w-6 h-6 lg:w-5 lg:h-5 text-gray-600"></i>
                 </button>
-                <div class="text-right hidden sm:block">
-                    <div id="live-clock" class="text-sm font-medium text-gray-700 tabular-nums leading-none">--:--</div>
-                    <div id="live-date-full" class="text-[10px] font-medium text-gray-400 uppercase tracking-wider leading-none mt-1">Cargando...</div>
+                <div id="user-avatar" class="hidden w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-sm overflow-hidden">
+                    <img id="user-photo" src="" class="w-full h-full object-cover">
                 </div>
             </div>
         </header>
 
-        <!-- Cuerpo de la App -->
-        <div class="flex flex-1 overflow-hidden">
+        <!-- CONTENT AREA -->
+        <div class="flex-1 relative overflow-hidden flex lg:flex-row bg-[#F2F2F7] lg:bg-transparent">
             
-            <!-- Panel Izquierdo: Agenda / Horario -->
-            <section class="w-[35%] glass-sidebar flex flex-col min-w-[320px] max-w-md relative z-10">
-                <div class="p-5 pb-2 border-b border-gray-200/50">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2 tracking-tight">
-                            <i data-lucide="calendar" class="w-5 h-5 text-blue-500"></i>
-                            Agenda
-                        </h2>
-                        <button onclick="openModal('schedule')" class="w-8 h-8 rounded-full bg-white shadow-sm hover:shadow text-blue-600 flex items-center justify-center transition-all hover:scale-105 active:scale-95" title="Añadir Evento">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
+            <!-- VIEW 1: AGENDA (Mobile: View, Desktop: Sidebar) -->
+            <section id="view-agenda" class="absolute lg:static inset-0 w-full lg:w-[35%] lg:min-w-[320px] flex flex-col bg-[#F2F2F7] lg:bg-white/40 lg:border-r border-gray-200/50 view-transition z-20">
+                
+                <!-- Date Selector (Sticky) -->
+                <div class="bg-[#F2F2F7]/90 lg:bg-transparent backdrop-blur-sm p-4 pb-2 sticky top-0 z-10">
+                    <div class="flex justify-between items-center mb-3 lg:hidden">
+                        <h1 class="text-3xl font-bold tracking-tight text-gray-900">Agenda</h1>
+                        <button onclick="openModal('schedule')" class="w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-90 transition">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
                         </button>
                     </div>
-
-                    <!-- Selector de Días Semanal (Real Dates) -->
-                    <div class="flex justify-between bg-gray-200/50 p-1 rounded-lg mb-2 overflow-x-auto no-scrollbar">
-                        <div id="day-selector" class="flex w-full justify-between gap-1"></div>
-                    </div>
-                </div>
-                
-                <div class="flex-1 overflow-y-auto p-4 space-y-3" id="schedule-list">
-                    <!-- Eventos renderizados aquí -->
-                </div>
-                
-                <!-- Footer del panel izquierdo -->
-                <div class="p-3 border-t border-gray-200/50 bg-white/30 text-xs text-center text-gray-500 font-medium flex justify-between px-6">
-                    <span id="schedule-summary">0 eventos</span>
-                    <span class="text-blue-500 cursor-pointer hover:underline" onclick="setDay(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1)">Ir a Hoy</span>
-                </div>
-            </section>
-
-            <!-- Panel Derecho: Dashboard y Tareas -->
-            <section class="flex-1 bg-white/30 flex flex-col relative">
-                
-                <!-- Dashboard de Métricas -->
-                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <!-- Tarjeta Pendientes -->
-                    <div class="bg-white/70 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-28 group hover:scale-[1.02] transition-transform duration-300">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Por Hacer</span>
-                            <div class="bg-orange-100 p-2 rounded-lg text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                                <i data-lucide="list-todo" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="text-3xl font-bold text-gray-800" id="pending-count">0</span>
-                            <span class="text-xs text-gray-400 ml-1">tareas</span>
-                        </div>
-                    </div>
-
-                    <!-- Tarjeta Eventos Hoy -->
-                    <div class="bg-white/70 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-28 group hover:scale-[1.02] transition-transform duration-300">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hoy</span>
-                            <div class="bg-blue-100 p-2 rounded-lg text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                                <i data-lucide="clock" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="text-3xl font-bold text-gray-800" id="today-events-count">0</span>
-                            <span class="text-xs text-gray-400 ml-1">eventos</span>
-                        </div>
-                    </div>
-
-                    <!-- Tarjeta Completados -->
-                    <div class="bg-white/70 backdrop-blur-md p-5 rounded-2xl shadow-sm border border-white/50 flex flex-col justify-between h-28 group hover:scale-[1.02] transition-transform duration-300">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Historial</span>
-                            <div class="bg-green-100 p-2 rounded-lg text-green-500 group-hover:bg-green-500 group-hover:text-white transition-colors">
-                                <i data-lucide="check-circle" class="w-5 h-5"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="text-3xl font-bold text-gray-800" id="completed-count">0</span>
-                            <span class="text-xs text-gray-400 ml-1">total</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Lista de Tareas Principal -->
-                <div class="flex-1 mx-4 mb-4 bg-white/50 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-white/60 flex flex-col overflow-hidden">
-                    <div class="p-5 flex justify-between items-center border-b border-gray-100 bg-white/40 sticky top-0 z-10">
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-lg font-bold text-gray-700">Mis Tareas</h3>
-                            <span class="bg-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold" id="total-todos-badge">0</span>
-                        </div>
-                        <div class="flex gap-2">
-                             <button onclick="openModal('todo')" class="text-sm font-medium px-4 py-2 rounded-lg bg-gray-900 text-white shadow-lg hover:bg-black transition-all flex items-center gap-2 active:scale-95">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Nueva
-                             </button>
-                        </div>
-                    </div>
                     
-                    <div class="flex-1 overflow-y-auto p-2" id="todo-list">
-                        <!-- Las tareas se renderizan aquí -->
+                    <div class="hidden lg:flex justify-between items-center mb-4 px-2">
+                        <h2 class="text-xl font-bold">Calendario</h2>
+                        <button onclick="openModal('schedule')" class="text-blue-600 hover:bg-blue-50 p-1 rounded-lg"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                    </div>
+
+                    <div class="flex justify-between gap-2 overflow-x-auto no-scrollbar py-1" id="day-selector">
+                        <!-- Days injected here -->
                     </div>
                 </div>
+
+                <!-- Schedule List -->
+                <div class="flex-1 overflow-y-auto px-4 pb-24 lg:pb-4 space-y-3" id="schedule-list">
+                    <!-- Events injected here -->
+                </div>
             </section>
-        </div>
 
-        <!-- Contenedor de Notificaciones (Toasts) -->
-        <div id="toast-container" class="absolute top-16 right-5 z-[60] flex flex-col gap-3 pointer-events-none w-80">
-            <!-- Los toasts se inyectan aquí -->
-        </div>
-
-        <!-- MODAL UNIVERSAL (Agregar/Editar) -->
-        <div id="modal" class="absolute inset-0 z-50 hidden">
-            <div class="absolute inset-0 bg-gray-900/20 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeModal()"></div>
-            <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform scale-95 opacity-0 transition-all duration-300 pointer-events-auto border border-gray-100" id="modal-content">
-                    <div class="p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h3 class="text-xl font-bold text-gray-900" id="modal-title">Título</h3>
-                                <p class="text-sm text-gray-500" id="modal-subtitle">Subtítulo</p>
-                            </div>
-                            <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">
-                                <i data-lucide="x" class="w-4 h-4"></i>
+            <!-- VIEW 2: TASKS (Mobile: View, Desktop: Main) -->
+            <section id="view-tasks" class="absolute lg:static inset-0 w-full lg:flex-1 flex flex-col bg-[#F2F2F7] lg:bg-transparent view-transition translate-x-full lg:translate-x-0 z-20">
+                
+                <div class="flex-1 overflow-y-auto pb-24 lg:pb-0">
+                    <!-- Mobile Header for Tasks -->
+                    <div class="p-4 lg:p-8">
+                        <div class="flex justify-between items-center mb-6 lg:hidden">
+                            <h1 class="text-3xl font-bold tracking-tight text-gray-900">Tareas</h1>
+                            <button onclick="openModal('todo')" class="w-8 h-8 bg-blue-500 rounded-full text-white flex items-center justify-center shadow-lg shadow-blue-500/30 active:scale-90 transition">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
                             </button>
                         </div>
-                        
-                        <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
-                            <div id="form-fields"></div>
-                            
-                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 mt-6">
-                                <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium transition text-sm">Cancelar</button>
-                                <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-lg shadow-blue-500/20 transition transform active:scale-95 text-sm flex items-center gap-2">
-                                    <i data-lucide="save" class="w-4 h-4"></i> Guardar
+
+                        <!-- Stats Cards -->
+                        <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-5 mb-6">
+                            <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col justify-between h-28 lg:h-32">
+                                <div class="flex justify-between"><span class="text-xs font-bold text-gray-400 uppercase">Pendiente</span><i data-lucide="list-todo" class="w-4 h-4 text-orange-500"></i></div>
+                                <span class="text-3xl font-bold text-gray-800" id="pending-count">0</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col justify-between h-28 lg:h-32">
+                                <div class="flex justify-between"><span class="text-xs font-bold text-gray-400 uppercase">Hoy</span><i data-lucide="clock" class="w-4 h-4 text-blue-500"></i></div>
+                                <span class="text-3xl font-bold text-gray-800" id="today-events-count">0</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl shadow-sm flex flex-col justify-between h-28 lg:h-32 col-span-2 lg:col-span-1">
+                                <div class="flex justify-between"><span class="text-xs font-bold text-gray-400 uppercase">Hecho</span><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i></div>
+                                <span class="text-3xl font-bold text-gray-800" id="completed-count">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Task List -->
+                        <div class="bg-white rounded-2xl shadow-sm overflow-hidden min-h-[300px]">
+                            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                                <h3 class="font-bold text-gray-700">Mi Lista</h3>
+                                <button onclick="openModal('todo')" class="hidden lg:flex text-xs bg-gray-900 text-white px-3 py-1.5 rounded-lg hover:bg-black transition items-center gap-1">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> Nueva
                                 </button>
+                            </div>
+                            <div id="todo-list" class="p-2 space-y-1">
+                                <!-- Todos injected here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- MOBILE BOTTOM NAV (iOS Tab Bar) -->
+        <nav class="lg:hidden absolute bottom-0 left-0 right-0 h-[83px] bg-white/90 backdrop-blur-xl border-t border-gray-200 flex justify-around items-start pt-2 z-50 pb-safe">
+            <button onclick="switchView('agenda')" id="nav-agenda" class="nav-item active flex flex-col items-center w-16 gap-1 text-gray-400 transition-colors">
+                <i data-lucide="calendar-days" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Agenda</span>
+            </button>
+            
+            <!-- Botón central flotante falso (visual) -->
+            <div class="w-12"></div> 
+            <button onclick="openModal(currentView === 'agenda' ? 'schedule' : 'todo')" class="absolute top-[-20px] left-1/2 transform -translate-x-1/2 bg-blue-600 text-white w-14 h-14 rounded-full shadow-xl shadow-blue-600/30 flex items-center justify-center active:scale-95 transition">
+                <i data-lucide="plus" class="w-7 h-7"></i>
+            </button>
+
+            <button onclick="switchView('tasks')" id="nav-tasks" class="nav-item flex flex-col items-center w-16 gap-1 text-gray-400 transition-colors">
+                <i data-lucide="check-square" class="w-6 h-6"></i>
+                <span class="text-[10px] font-medium">Tareas</span>
+            </button>
+        </nav>
+
+        <!-- TOASTS -->
+        <div id="toast-container" class="absolute top-16 left-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none lg:w-80 lg:right-4 lg:left-auto"></div>
+
+        <!-- MODAL UNIVERSAL (Bottom Sheet on Mobile) -->
+        <div id="modal" class="absolute inset-0 z-[100] hidden">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity opacity-0" id="modal-backdrop" onclick="closeModal()"></div>
+            
+            <div class="absolute inset-x-0 bottom-0 lg:inset-0 lg:flex lg:items-center lg:justify-center pointer-events-none">
+                <div class="bg-white w-full lg:w-[450px] rounded-t-[20px] lg:rounded-2xl shadow-2xl overflow-hidden transform transition-transform duration-300 translate-y-full lg:translate-y-10 lg:scale-95 opacity-0 pointer-events-auto flex flex-col max-h-[90vh]" id="modal-content">
+                    
+                    <!-- Drag Handle (Mobile) -->
+                    <div class="lg:hidden w-full flex justify-center pt-3 pb-1" onclick="closeModal()">
+                        <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
+                    </div>
+
+                    <div class="p-6 pt-2 lg:pt-6 overflow-y-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-gray-900" id="modal-title">Nuevo</h3>
+                            <button onclick="closeModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">
+                                <i data-lucide="x" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div id="form-fields"></div>
+                            <div class="pt-4">
+                                <button type="submit" class="w-full py-3.5 rounded-xl bg-blue-600 text-white font-bold text-lg lg:text-sm shadow-lg shadow-blue-500/20 active:scale-[0.98] transition">Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -272,161 +271,102 @@
             </div>
         </div>
 
-        <!-- MODAL DE AJUSTES AVANZADOS -->
-        <div id="settings-modal" class="absolute inset-0 z-50 hidden flex items-center justify-center bg-black/20 backdrop-blur-sm p-4">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl h-[500px] flex overflow-hidden animate-[fadeIn_0.2s_ease-out]">
-                <!-- Sidebar Ajustes -->
-                <div class="w-1/3 bg-gray-50 border-r p-4 flex flex-col gap-2">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 px-2">Ajustes</h3>
-                    <button onclick="switchSettingsTab('general')" class="settings-tab-btn active text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition" data-tab="general">
-                        <i data-lucide="layout" class="w-4 h-4 inline mr-2"></i> General
-                    </button>
-                    <button onclick="switchSettingsTab('cloud')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition text-blue-600" data-tab="cloud">
-                        <i data-lucide="cloud" class="w-4 h-4 inline mr-2"></i> Nube Google
-                    </button>
-                    <button onclick="switchSettingsTab('categories')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition" data-tab="categories">
-                        <i data-lucide="tags" class="w-4 h-4 inline mr-2"></i> Categorías
-                    </button>
-                    <button onclick="switchSettingsTab('data')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition" data-tab="data">
-                        <i data-lucide="database" class="w-4 h-4 inline mr-2"></i> Datos
-                    </button>
-                    <button onclick="switchSettingsTab('system')" class="settings-tab-btn text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-white hover:shadow-sm transition" data-tab="system">
-                        <i data-lucide="bell" class="w-4 h-4 inline mr-2"></i> Sistema
-                    </button>
+        <!-- SETTINGS MODAL (Responsive) -->
+        <div id="settings-modal" class="absolute inset-0 z-[100] hidden bg-black/40 backdrop-blur-sm flex items-end lg:items-center justify-center">
+            <div class="bg-white w-full lg:w-[600px] h-[80vh] lg:h-[500px] rounded-t-[20px] lg:rounded-2xl flex flex-col overflow-hidden animate-slideUp lg:animate-fadeIn">
+                <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-lg">Configuración</h3>
+                    <button onclick="closeSettings()" class="p-2 bg-gray-200 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
-
-                <!-- Contenido Ajustes -->
-                <div class="flex-1 p-8 overflow-y-auto relative">
-                    <button onclick="closeSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+                
+                <div class="flex flex-1 overflow-hidden">
+                    <!-- Sidebar Tabs (Desktop) -->
+                    <div class="w-1/3 bg-gray-50 p-2 hidden lg:block border-r">
+                        <button onclick="switchSettingsTab('general')" class="settings-tab-btn w-full text-left p-2 rounded-lg hover:bg-white mb-1 text-sm font-medium">General</button>
+                        <button onclick="switchSettingsTab('cloud')" class="settings-tab-btn w-full text-left p-2 rounded-lg hover:bg-white mb-1 text-sm font-medium text-blue-600">Nube</button>
+                        <button onclick="switchSettingsTab('categories')" class="settings-tab-btn w-full text-left p-2 rounded-lg hover:bg-white mb-1 text-sm font-medium">Categorías</button>
+                        <button onclick="switchSettingsTab('data')" class="settings-tab-btn w-full text-left p-2 rounded-lg hover:bg-white mb-1 text-sm font-medium">Datos</button>
+                    </div>
                     
-                    <!-- TAB: General -->
-                    <div id="tab-general" class="settings-content block">
-                        <h2 class="text-xl font-bold mb-4">Personalización</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Fondo de Pantalla (URL)</label>
-                                <div class="flex gap-2">
-                                    <input type="text" id="bg-url-input" class="flex-1 border rounded-lg px-3 py-2 text-sm" placeholder="https://...">
-                                    <button onclick="saveBackground()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm">Aplicar</button>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Usa imágenes de Unsplash para mejor calidad.</p>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Preestablecidos</label>
-                                <div class="flex gap-2">
-                                    <button onclick="setPresetBg('nature')" class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-transparent hover:border-blue-500" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop')"></button>
-                                    <button onclick="setPresetBg('dark')" class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-transparent hover:border-blue-500" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop')"></button>
-                                    <button onclick="setPresetBg('abstract')" class="w-10 h-10 rounded-full bg-cover bg-center border-2 border-transparent hover:border-blue-500" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop')"></button>
-                                </div>
-                            </div>
-                        </div>
+                    <!-- Mobile Tabs (Top Scroll) -->
+                    <div class="lg:hidden w-full overflow-x-auto flex gap-2 p-2 border-b bg-gray-50 shrink-0 no-scrollbar">
+                        <button onclick="switchSettingsTab('general')" class="px-4 py-2 bg-white rounded-full text-sm font-bold shadow-sm whitespace-nowrap">General</button>
+                        <button onclick="switchSettingsTab('cloud')" class="px-4 py-2 bg-white rounded-full text-sm font-bold shadow-sm text-blue-600 whitespace-nowrap">Nube</button>
+                        <button onclick="switchSettingsTab('categories')" class="px-4 py-2 bg-white rounded-full text-sm font-bold shadow-sm whitespace-nowrap">Categorías</button>
                     </div>
 
-                    <!-- TAB: Cloud / Sync -->
-                    <div id="tab-cloud" class="settings-content hidden">
-                        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
-                            <i data-lucide="cloud" class="w-5 h-5 text-blue-600"></i> Sincronización Google
-                        </h2>
-                        <div class="space-y-4">
-                            <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                <p class="text-sm text-blue-800 mb-2">
-                                    Sincroniza tus datos en todos tus dispositivos usando tu cuenta de Google.
-                                </p>
-                                <p class="text-xs text-blue-600 font-medium">
-                                    Requiere habilitar "Google" en Firebase Console > Authentication.
-                                </p>
+                    <div class="flex-1 p-6 overflow-y-auto">
+                        <!-- GENERAL TAB -->
+                        <div id="tab-general" class="settings-content">
+                            <h4 class="font-bold mb-4">Fondo</h4>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div onclick="setPresetBg('nature')" class="aspect-square bg-gray-200 rounded-lg bg-cover" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=200')"></div>
+                                <div onclick="setPresetBg('dark')" class="aspect-square bg-gray-800 rounded-lg bg-cover" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=200')"></div>
+                                <div onclick="setPresetBg('white')" class="aspect-square bg-white border rounded-lg flex items-center justify-center text-xs text-gray-500">Limpiar</div>
                             </div>
+                        </div>
+
+                        <!-- CLOUD TAB -->
+                        <div id="tab-cloud" class="settings-content hidden">
+                            <h4 class="font-bold mb-4">Sincronización Google</h4>
                             
-                            <div id="auth-section" class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50">
-                                <button onclick="loginWithGoogle()" class="flex items-center gap-3 bg-white text-gray-700 px-6 py-3 rounded-full shadow-md hover:shadow-lg transition border border-gray-200 font-medium">
-                                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
-                                    Iniciar sesión con Google
+                            <div id="auth-ui" class="text-center py-8">
+                                <p class="text-sm text-gray-500 mb-4">Inicia sesión para guardar tus datos en la nube y acceder desde cualquier dispositivo.</p>
+                                <button onclick="loginWithGoogle()" class="bg-white border text-gray-700 px-6 py-3 rounded-xl shadow-sm flex items-center gap-3 w-full justify-center font-medium hover:bg-gray-50">
+                                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Conectar Google
                                 </button>
                             </div>
 
-                            <div id="user-profile" class="hidden flex items-center gap-4 p-4 bg-white border rounded-xl shadow-sm">
-                                <img id="profile-pic" src="" class="w-12 h-12 rounded-full bg-gray-200">
-                                <div class="flex-1">
-                                    <h4 id="profile-name" class="font-bold text-gray-800">Usuario</h4>
-                                    <p id="profile-email" class="text-xs text-gray-500">correo@ejemplo.com</p>
+                            <div id="user-ui" class="hidden">
+                                <div class="bg-green-50 p-4 rounded-xl border border-green-100 mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <img id="user-img-settings" src="" class="w-10 h-10 rounded-full border-2 border-white">
+                                        <div class="overflow-hidden">
+                                            <div id="user-name-settings" class="font-bold text-gray-800 truncate">Usuario</div>
+                                            <div class="text-xs text-green-700 font-medium flex items-center gap-1">
+                                                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Sincronización activa
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <button onclick="logout()" class="text-red-500 hover:bg-red-50 p-2 rounded-lg text-sm font-medium">Salir</button>
-                            </div>
-
-                            <div id="sync-active-message" class="hidden p-3 bg-green-50 text-green-700 rounded-lg text-sm border border-green-100 flex items-center gap-2">
-                                <i data-lucide="check-circle-2" class="w-4 h-4"></i> Tus datos se guardan en tu cuenta.
-                            </div>
-                            <div id="sync-error-message" class="hidden p-3 bg-red-50 text-red-700 rounded-lg text-sm border border-red-100 flex items-center gap-2">
-                                <i data-lucide="alert-triangle" class="w-4 h-4"></i> Error de configuración Firebase.
+                                <button onclick="logout()" class="w-full py-3 text-red-500 font-bold bg-red-50 hover:bg-red-100 rounded-xl transition">Cerrar Sesión</button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- TAB: Categorías -->
-                    <div id="tab-categories" class="settings-content hidden">
-                        <h2 class="text-xl font-bold mb-4">Categorías</h2>
-                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4">
-                            <input type="text" name="catName" placeholder="Nueva Categoría" class="flex-1 px-3 py-2 bg-gray-50 rounded-lg border outline-none text-sm" required>
-                            <select name="catColor" class="px-3 py-2 bg-gray-50 rounded-lg border outline-none text-sm">
-                                <option value="blue">Azul</option>
-                                <option value="red">Rojo</option>
-                                <option value="green">Verde</option>
-                                <option value="purple">Morado</option>
-                                <option value="orange">Naranja</option>
-                                <option value="pink">Rosa</option>
-                                <option value="gray">Gris</option>
-                                <option value="yellow">Amarillo</option>
-                            </select>
-                            <button type="submit" class="p-2 bg-gray-900 text-white rounded-lg hover:bg-black"><i data-lucide="plus" class="w-4 h-4"></i></button>
-                        </form>
-                        <div id="categories-list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
-                    </div>
+                        <!-- CATEGORIES TAB -->
+                        <div id="tab-categories" class="settings-content hidden">
+                            <h4 class="font-bold mb-4">Categorías</h4>
+                            <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4">
+                                <input type="text" name="catName" placeholder="Nueva..." class="flex-1 px-3 py-2 bg-gray-100 rounded-lg outline-none text-sm" required>
+                                <select name="catColor" class="w-12 bg-gray-100 rounded-lg outline-none text-sm p-1">
+                                    <option value="blue">🔵</option>
+                                    <option value="red">🔴</option>
+                                    <option value="green">🟢</option>
+                                    <option value="purple">🟣</option>
+                                    <option value="orange">🟠</option>
+                                </select>
+                                <button type="submit" class="p-2 bg-black text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button>
+                            </form>
+                            <div id="categories-list" class="space-y-2"></div>
+                        </div>
 
-                    <!-- TAB: Datos -->
-                    <div id="tab-data" class="settings-content hidden">
-                        <h2 class="text-xl font-bold mb-4">Gestión de Datos</h2>
-                        <div class="space-y-4">
-                            <div class="p-4 bg-gray-50 rounded-xl border">
-                                <h4 class="font-bold text-sm mb-1">Copia de Seguridad</h4>
-                                <p class="text-xs text-gray-500 mb-3">Descarga todos tus horarios y tareas en un archivo JSON.</p>
-                                <button onclick="exportData()" class="flex items-center gap-2 px-4 py-2 bg-white border shadow-sm rounded-lg text-sm hover:bg-gray-50">
-                                    <i data-lucide="download" class="w-4 h-4"></i> Descargar Backup
+                        <!-- DATA TAB -->
+                        <div id="tab-data" class="settings-content hidden">
+                            <h4 class="font-bold mb-4">Datos</h4>
+                            <div class="space-y-3">
+                                <button onclick="exportData()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
+                                    <span class="text-sm font-medium">Descargar Backup</span>
+                                    <i data-lucide="download" class="w-4 h-4 text-gray-500"></i>
                                 </button>
-                            </div>
-                            <div class="p-4 bg-gray-50 rounded-xl border">
-                                <h4 class="font-bold text-sm mb-1">Restaurar</h4>
-                                <p class="text-xs text-gray-500 mb-3">Sube un archivo JSON para recuperar tus datos.</p>
                                 <input type="file" id="import-file" class="hidden" onchange="importData(this)">
-                                <button onclick="document.getElementById('import-file').click()" class="flex items-center gap-2 px-4 py-2 bg-white border shadow-sm rounded-lg text-sm hover:bg-gray-50">
-                                    <i data-lucide="upload" class="w-4 h-4"></i> Seleccionar Archivo
+                                <button onclick="document.getElementById('import-file').click()" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100">
+                                    <span class="text-sm font-medium">Restaurar</span>
+                                    <i data-lucide="upload" class="w-4 h-4 text-gray-500"></i>
                                 </button>
-                            </div>
-                            <div class="pt-4 border-t">
-                                <button onclick="resetAllData()" class="text-red-500 text-sm font-medium hover:underline">Borrar todos los datos de fábrica</button>
+                                <button onclick="resetAllData()" class="w-full p-3 text-red-500 text-sm font-bold mt-4">Borrar todo</button>
                             </div>
                         </div>
                     </div>
-
-                    <!-- TAB: Sistema -->
-                    <div id="tab-system" class="settings-content hidden">
-                        <h2 class="text-xl font-bold mb-4">Sistema</h2>
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between p-4 border rounded-xl">
-                                <div>
-                                    <h4 class="font-bold text-sm">Notificaciones de Navegador</h4>
-                                    <p class="text-xs text-gray-500">Recibe alertas incluso si la pestaña no está activa.</p>
-                                </div>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" id="browser-notify-toggle" class="sr-only peer" onchange="toggleBrowserNotifications()">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                                </label>
-                            </div>
-                            <div class="p-4 bg-blue-50 text-blue-800 text-xs rounded-xl">
-                                <strong>Nota:</strong> Las notificaciones internas (toasts) siempre están activas.
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -436,7 +376,6 @@
     <script>
         // =============================================================================
         //  CONFIGURACIÓN PARA GITHUB PAGES / HOSTING PROPIO
-        //  Aquí están tus datos integrados automáticamente.
         // =============================================================================
         
         const USER_FIREBASE_CONFIG = {
@@ -447,197 +386,139 @@
             messagingSenderId: "245410649722",
             appId: "1:245410649722:web:fe36ccf0d600e8bbfd0dc3"
         };
-        
-        // =============================================================================
 
-        // --- FIREBASE SETUP & SAFEGUARDS ---
-        let auth, db, appId;
-        let isCloudAvailable = false;
-
-        try {
-            let configToUse = null;
-
-            // Prioridad 1: Configuración del usuario
-            if (USER_FIREBASE_CONFIG) {
-                configToUse = USER_FIREBASE_CONFIG;
-                console.log("MyDay OS: Usando configuración personalizada de Firebase.");
-            } 
-            // Prioridad 2: Configuración del entorno
-            else if (typeof __firebase_config !== 'undefined') {
-                configToUse = JSON.parse(__firebase_config);
-            }
-
-            if (configToUse) {
-                if (!firebase.apps.length) {
-                    firebase.initializeApp(configToUse);
-                } else {
-                    firebase.app(); 
-                }
-                
-                auth = firebase.auth();
-                db = firebase.firestore();
-                
-                // Usamos el ID del proyecto si es config de usuario
-                if (USER_FIREBASE_CONFIG) {
-                    appId = USER_FIREBASE_CONFIG.projectId;
-                } else {
-                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-                }
-                
-                isCloudAvailable = true;
-                
-                document.getElementById('sync-status-indicator').classList.remove('sync-disabled');
-                document.getElementById('sync-error-message').classList.add('hidden');
-                
-            } else {
-                throw new Error("No config found");
-            }
-
-        } catch (e) {
-            console.warn("MyDay OS: Modo Local activado. Firebase no configurado.", e);
-            document.getElementById('sync-status-indicator').classList.add('sync-disabled');
-            document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-red-500"></div> Offline';
-            document.getElementById('sync-error-message').classList.remove('hidden');
-            isCloudAvailable = false;
-        }
-
-        // --- Configuración Global ---
-        const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-        const COLORS = {
-            blue: 'bg-blue-100 text-blue-700 border-blue-200', red: 'bg-red-100 text-red-700 border-red-200',
-            green: 'bg-green-100 text-green-700 border-green-200', purple: 'bg-purple-100 text-purple-700 border-purple-200',
-            orange: 'bg-orange-100 text-orange-700 border-orange-200', pink: 'bg-pink-100 text-pink-700 border-pink-200',
-            gray: 'bg-gray-100 text-gray-700 border-gray-200', yellow: 'bg-yellow-100 text-yellow-800 border-yellow-200'
-        };
-        const DOT_COLORS = {
-            blue: 'bg-blue-500', red: 'bg-red-500', green: 'bg-green-500', purple: 'bg-purple-500',
-            orange: 'bg-orange-500', pink: 'bg-pink-500', gray: 'bg-gray-500', yellow: 'bg-yellow-400'
-        };
-
-        // --- Estado Inicial ---
+        // --- CORE LOGIC ---
         let state = {
-            currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1, // 0=Lunes
+            currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+            schedule: [], todos: [],
             categories: [
-                { id: 'c1', name: 'Estudio', color: 'blue' },
-                { id: 'c2', name: 'Vida', color: 'orange' },
-                { id: 'c3', name: 'Trabajo', color: 'purple' },
-                { id: 'c4', name: 'Importante', color: 'red' }
+                {id: 'c1', name: 'Clase', color: 'blue'},
+                {id: 'c2', name: 'Tarea', color: 'orange'},
+                {id: 'c3', name: 'Ocio', color: 'purple'},
+                {id: 'c4', name: 'Urgente', color: 'red'}
             ],
-            schedule: [],
-            todos: [],
-            settings: {
-                bgUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
-                browserNotifications: false
-            }
+            settings: { bgUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop' }
         };
-
+        
+        let currentView = 'agenda';
+        let auth, db, appId, currentUser;
+        let isCloudAvailable = false;
         let unsubscribeSnapshot = null;
         let isSaving = false;
-        let currentUser = null;
 
-        // --- AUTH & SYNC LOGIC ---
-        function loginWithGoogle() {
-            if (!isCloudAvailable) return alert("Firebase no configurado.");
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(error => {
-                console.error(error);
-                alert("Error al iniciar sesión: " + error.message + "\n\nRecuerda habilitar 'Google' en la consola de Firebase > Authentication.");
-            });
+        const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const COLORS = {
+            blue: 'bg-blue-100 text-blue-700', red: 'bg-red-100 text-red-700',
+            green: 'bg-green-100 text-green-700', purple: 'bg-purple-100 text-purple-700',
+            orange: 'bg-orange-100 text-orange-700', pink: 'bg-pink-100 text-pink-700',
+            gray: 'bg-gray-100 text-gray-700', yellow: 'bg-yellow-100 text-yellow-800'
+        };
+
+        // --- INIT ---
+        try {
+            firebase.initializeApp(USER_FIREBASE_CONFIG);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            appId = USER_FIREBASE_CONFIG.projectId;
+            isCloudAvailable = true;
+        } catch(e) { console.log("Offline mode", e); }
+
+        function init() {
+            // Cargar datos locales primero
+            const local = localStorage.getItem('myDayOS_v3');
+            if(local) state = {...state, ...JSON.parse(local)};
+            
+            render();
+            setupAuthListener();
+            
+            setInterval(updateClock, 1000);
+            updateClock();
         }
 
-        function logout() {
-            if(auth) auth.signOut();
-        }
-
-        // Observer Auth State
-        if (isCloudAvailable) {
-            auth.onAuthStateChanged((user) => {
+        // --- AUTH & SYNC ---
+        function setupAuthListener() {
+            if(!isCloudAvailable) return;
+            
+            auth.onAuthStateChanged(user => {
                 currentUser = user;
-                if (user) {
-                    // UI Logueado
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('user-profile').classList.remove('hidden');
-                    document.getElementById('user-profile').classList.add('flex');
-                    document.getElementById('profile-name').textContent = user.displayName;
-                    document.getElementById('profile-email').textContent = user.email;
-                    document.getElementById('profile-pic').src = user.photoURL;
-                    
-                    document.getElementById('user-avatar').classList.remove('hidden');
-                    document.getElementById('user-photo').src = user.photoURL;
+                const authUi = document.getElementById('auth-ui');
+                const userUi = document.getElementById('user-ui');
+                const avatar = document.getElementById('user-avatar');
+                const statusIndicator = document.getElementById('sync-status-indicator');
+                const syncDot = document.getElementById('sync-dot');
 
-                    document.getElementById('sync-active-message').classList.remove('hidden');
+                if(user) {
+                    // UI Logueado
+                    authUi.classList.add('hidden');
+                    userUi.classList.remove('hidden');
+                    avatar.classList.remove('hidden');
+                    document.getElementById('user-photo').src = user.photoURL;
                     
-                    // Iniciar Sync
+                    // Info en Settings
+                    document.getElementById('user-img-settings').src = user.photoURL;
+                    document.getElementById('user-name-settings').innerText = user.displayName;
+
+                    // Indicators
+                    if(statusIndicator) {
+                        statusIndicator.className = 'sync-badge sync-active hidden lg:flex';
+                        statusIndicator.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Nube';
+                    }
+                    if(syncDot) {
+                        syncDot.classList.remove('bg-gray-300'); syncDot.classList.add('bg-green-500');
+                    }
+                    
                     activateFirestoreSync(user.uid);
                 } else {
                     // UI Deslogueado
-                    document.getElementById('auth-section').classList.remove('hidden');
-                    document.getElementById('user-profile').classList.add('hidden');
-                    document.getElementById('user-profile').classList.remove('flex');
-                    document.getElementById('user-avatar').classList.add('hidden');
-                    document.getElementById('sync-active-message').classList.add('hidden');
-                    
+                    authUi.classList.remove('hidden');
+                    userUi.classList.add('hidden');
+                    avatar.classList.add('hidden');
+                    if(syncDot) { syncDot.classList.add('bg-gray-300'); syncDot.classList.remove('bg-green-500'); }
+                    if(statusIndicator) {
+                        statusIndicator.className = 'sync-badge sync-offline hidden lg:flex';
+                        statusIndicator.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local';
+                    }
                     if(unsubscribeSnapshot) unsubscribeSnapshot();
-                    document.getElementById('sync-status-indicator').className = 'sync-badge sync-offline';
-                    document.getElementById('sync-status-indicator').innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local';
                 }
             });
-        }
-
-        function initPersistence() {
-            const saved = localStorage.getItem('myDayOS_v3');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                state = { ...state, ...parsed };
-            }
-            applySettings();
         }
 
         function activateFirestoreSync(uid) {
             if (!isCloudAvailable) return;
-
-            const statusBadge = document.getElementById('sync-status-indicator');
-            statusBadge.className = 'sync-badge sync-connecting';
-            statusBadge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-current animate-pulse"></div> Syncing...`;
-
             if(unsubscribeSnapshot) unsubscribeSnapshot();
 
-            // RUTA DE DATOS USUARIO
+            // Ruta: /artifacts/{appId}/users/{uid}/data/main
             const docRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('data').doc('main');
 
             let firstLoad = true;
 
             unsubscribeSnapshot = docRef.onSnapshot((doc) => {
-                statusBadge.className = 'sync-badge sync-active';
-                statusBadge.innerHTML = `<div class="w-1.5 h-1.5 rounded-full bg-current"></div> En línea`;
-
                 if(doc.exists && !isSaving) {
                     const remoteData = doc.data();
                     state.schedule = remoteData.schedule || [];
                     state.todos = remoteData.todos || [];
                     state.categories = remoteData.categories || state.categories;
                     
-                    renderApp();
-                    updateStats();
+                    render(); // Re-renderizar todo
                     
-                    if(!firstLoad) showToast('Datos actualizados', 'Nube');
+                    if(!firstLoad) showToast('Sincronizado', 'Nube');
                 } else if (!doc.exists && (state.schedule.length > 0 || state.todos.length > 0)) {
-                    // Subir datos locales si no existen en nube
-                    saveDataToCloud(); 
+                    saveDataToCloud(); // Subir lo local si es nuevo usuario
                 }
                 firstLoad = false;
-            }, (error) => {
-                console.error("Error sync:", error);
-                statusBadge.className = 'sync-badge sync-disabled';
-                statusBadge.innerHTML = `<i data-lucide="wifi-off" class="w-3 h-3 mr-1"></i> Error`;
-                // Si falla por permisos, es probable que Rules bloqueen. 
-                // Pero Firestore por defecto en modo test permite todo por 30 días.
             });
         }
 
+        function loginWithGoogle() { 
+            const p = new firebase.auth.GoogleAuthProvider(); 
+            auth.signInWithPopup(p).catch(e => alert("Error auth: " + e.message)); 
+        }
+        function logout() { auth.signOut(); }
+
+        // --- DATA PERSISTENCE ---
         async function saveData() {
             localStorage.setItem('myDayOS_v3', JSON.stringify(state));
-            updateStats();
+            renderStats(); // Actualizar stats rápido
             if(isCloudAvailable && currentUser) {
                 saveDataToCloud();
             }
@@ -648,7 +529,6 @@
             if (!isCloudAvailable || !currentUser) return;
             clearTimeout(saveTimeout);
             isSaving = true;
-            
             saveTimeout = setTimeout(async () => {
                 try {
                     const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main');
@@ -663,313 +543,179 @@
             }, 1000);
         }
 
-        function applySettings() {
-            document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`;
-            document.getElementById('browser-notify-toggle').checked = state.settings.browserNotifications;
-        }
-
-        // --- Helpers de Fecha Real ---
-        function getCurrentWeekDates() {
-            const now = new Date();
-            const currentDay = now.getDay(); 
-            const diff = now.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
-            
-            const monday = new Date(now.setDate(diff));
-            const weekDates = [];
-            
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(monday);
-                date.setDate(monday.getDate() + i);
-                weekDates.push(date);
-            }
-            return weekDates;
-        }
-
-        // --- Renderizado Principal ---
-        function init() {
-            initPersistence();
-            renderDaySelector();
-            renderApp();
-            setInterval(updateClock, 1000);
-            setInterval(checkNotifications, 60000);
-            updateClock();
-        }
-
-        function renderApp() {
+        // --- RENDER ---
+        function render() {
+            renderDays();
             renderSchedule();
             renderTodos();
-            updateStats();
+            renderStats();
+            applySettings();
             lucide.createIcons();
         }
 
-        // --- Renderizado de Horario ---
-        function renderDaySelector() {
-            const container = document.getElementById('day-selector');
-            const weekDates = getCurrentWeekDates();
-            
-            container.innerHTML = weekDates.map((date, index) => {
-                const isSelected = state.currentDayIndex === index;
-                const isToday = new Date().toDateString() === date.toDateString();
-                const dayName = DAYS_FULL[date.getDay() === 0 ? 0 : date.getDay()].charAt(0); // L, M...
-                const dayNumber = date.getDate();
-                
-                return `
-                    <button onclick="setDay(${index})" 
-                        class="flex flex-col items-center justify-center min-w-[3rem] h-12 rounded-lg transition-all mx-0.5
-                        ${isSelected ? 'bg-white text-blue-600 shadow-sm scale-100 border border-blue-100' : 'text-gray-400 hover:text-gray-600 hover:bg-white/40'}
-                        ${isToday && !isSelected ? 'text-blue-400 font-bold' : ''}">
-                        <span class="text-[10px] font-bold uppercase">${dayName}</span>
-                        <span class="text-sm font-medium ${isToday ? 'bg-blue-100 px-1.5 rounded-full text-blue-600' : ''}">${dayNumber}</span>
-                    </button>
-                `;
-            }).join('');
+        function switchView(view) {
+            currentView = view;
+            const agenda = document.getElementById('view-agenda');
+            const tasks = document.getElementById('view-tasks');
+            const navA = document.getElementById('nav-agenda');
+            const navT = document.getElementById('nav-tasks');
+            const title = document.getElementById('mobile-header-title');
+
+            if (view === 'agenda') {
+                tasks.classList.add('translate-x-full');
+                agenda.classList.remove('-translate-x-full');
+                navA.classList.add('active'); navT.classList.remove('active');
+                title.textContent = 'Agenda';
+            } else {
+                tasks.classList.remove('translate-x-full');
+                agenda.classList.add('-translate-x-full');
+                navT.classList.add('active'); navA.classList.remove('active');
+                title.textContent = 'Tareas';
+            }
         }
 
-        function setDay(index) {
-            state.currentDayIndex = index;
-            renderDaySelector();
-            renderSchedule();
+        function renderDays() {
+            const now = new Date();
+            const currentDayNum = now.getDay(); 
+            const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1);
+            const monday = new Date(now.setDate(diff));
+            
+            let html = '';
+            for(let i=0; i<7; i++) {
+                let d = new Date(monday);
+                d.setDate(monday.getDate() + i);
+                const isSel = i === state.currentDayIndex;
+                const isToday = new Date().toDateString() === d.toDateString();
+                const dayNameShort = DAYS_FULL[d.getDay() === 0 ? 0 : d.getDay()].substring(0,3);
+
+                html += `
+                <button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${isSel ? 'bg-white shadow-md text-blue-600 scale-105' : 'bg-transparent text-gray-400'}">
+                    <span class="text-[10px] font-bold uppercase">${dayNameShort}</span>
+                    <span class="text-lg font-bold ${isToday && !isSel ? 'text-blue-500' : ''}">${d.getDate()}</span>
+                    ${isToday ? '<span class="w-1 h-1 bg-blue-500 rounded-full mt-1"></span>' : ''}
+                </button>`;
+            }
+            document.getElementById('day-selector').innerHTML = html;
         }
 
         function renderSchedule() {
             const list = document.getElementById('schedule-list');
-            const weekDates = getCurrentWeekDates();
-            const currentDate = weekDates[state.currentDayIndex];
+            // Calcular fecha seleccionada
+            const now = new Date();
+            const currentDayNum = now.getDay();
+            const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1);
+            const monday = new Date(now.setDate(diff));
+            const selectedDate = new Date(monday);
+            selectedDate.setDate(monday.getDate() + state.currentDayIndex);
             
-            const dayNameMap = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-            const currentDayName = dayNameMap[currentDate.getDay()];
+            // Usar el nombre completo del día para filtrar (compatible con datos anteriores)
+            const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
             
-            const dayEvents = state.schedule.filter(s => s.day === currentDayName);
-            dayEvents.sort((a, b) => a.time.localeCompare(b.time));
-
-            const displayDate = `${currentDayName} ${currentDate.getDate()}`;
-            document.getElementById('schedule-summary').textContent = 
-                dayEvents.length === 0 ? `Nada para el ${displayDate}` : `${dayEvents.length} eventos (${displayDate})`;
-
-            list.innerHTML = '';
-
-            if (dayEvents.length === 0) {
-                list.innerHTML = `
-                    <div class="flex flex-col items-center justify-center h-40 text-gray-500 opacity-60">
-                        <i data-lucide="sun" class="w-10 h-10 mb-2 stroke-1"></i>
-                        <p class="text-sm">Día libre</p>
-                    </div>
-                `;
-                lucide.createIcons();
+            const items = state.schedule.filter(s => s.day === dayName).sort((a,b)=>a.time.localeCompare(b.time));
+            
+            if(items.length === 0) {
+                list.innerHTML = `<div class="flex flex-col items-center justify-center h-64 text-gray-400">
+                    <i data-lucide="coffee" class="w-12 h-12 mb-2 opacity-50"></i>
+                    <p class="text-sm">Nada para el ${dayName}</p>
+                </div>`;
                 return;
             }
 
-            dayEvents.forEach(item => {
-                const category = state.categories.find(c => c.id === item.categoryId) || { color: 'gray', name: '?' };
-                const dotColor = DOT_COLORS[category.color] || 'bg-gray-400';
-
-                const div = document.createElement('div');
-                div.className = 'group relative flex gap-3 p-3 rounded-xl bg-white/40 hover:bg-white/80 border border-transparent hover:border-blue-100 transition-all cursor-default shadow-sm hover:shadow-md';
-                div.innerHTML = `
-                    <div class="flex flex-col items-center pt-1 w-12 shrink-0">
-                        <span class="text-xs font-black text-gray-700 font-mono bg-white/50 px-1 rounded">${item.time}</span>
-                        <div class="h-full w-0.5 bg-gray-300/30 mt-2 rounded-full"></div>
+            list.innerHTML = items.map(item => {
+                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
+                const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
+                
+                return `
+                <div class="bg-white p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform" onclick="openModal('schedule', '${item.id}')">
+                    <div class="flex flex-col items-center w-12 border-r border-gray-100 pr-2 pt-1">
+                        <span class="font-bold text-gray-700 text-sm">${item.time}</span>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-0.5">
-                            <span class="w-2 h-2 rounded-full ${dotColor}"></span>
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider">${category.name}</span>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span>
+                            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">${cat.name}</span>
                         </div>
-                        <h4 class="text-gray-800 font-bold text-sm truncate">${item.title}</h4>
-                        ${item.desc ? `<p class="text-xs text-gray-500 line-clamp-2 mt-1 leading-relaxed">${item.desc}</p>` : ''}
+                        <h3 class="font-bold text-gray-800 truncate text-lg">${item.title}</h3>
+                        ${item.desc ? `<p class="text-sm text-gray-500 truncate">${item.desc}</p>` : ''}
                     </div>
-                    <div class="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="openModal('schedule', '${item.id}')" class="p-1.5 rounded-md hover:bg-blue-100 text-blue-500 transition"><i data-lucide="pencil" class="w-3 h-3"></i></button>
-                        <button onclick="deleteItem('schedule', '${item.id}')" class="p-1.5 rounded-md hover:bg-red-100 text-red-500 transition"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                    </div>
-                `;
-                list.appendChild(div);
-            });
-            lucide.createIcons();
+                </div>`;
+            }).join('');
         }
 
-        // --- Renderizado de Tareas ---
         function renderTodos() {
             const list = document.getElementById('todo-list');
-            list.innerHTML = '';
+            const items = state.todos.sort((a,b) => a.completed - b.completed);
             
-            const sortedTodos = [...state.todos].sort((a, b) => a.completed - b.completed);
-
-            if (sortedTodos.length === 0) {
-                 list.innerHTML = `<div class="flex flex-col items-center justify-center h-32 text-gray-400"><p class="text-sm italic">Sin pendientes.</p></div>`;
-                 return;
+            if(items.length === 0) {
+                list.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm">Sin tareas pendientes</div>';
+                return;
             }
 
-            sortedTodos.forEach(todo => {
-                const category = state.categories.find(c => c.id === todo.categoryId) || { color: 'gray', name: 'General' };
-                const badgeClass = COLORS[category.color] || COLORS['gray'];
-
-                const div = document.createElement('div');
-                div.className = `group flex items-start gap-3 p-3 mb-2 rounded-xl transition-all border ${todo.completed ? 'bg-gray-50/50 border-gray-100 opacity-60' : 'bg-white border-white hover:border-blue-200 hover:shadow-sm'}`;
+            list.innerHTML = items.map(item => {
+                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
+                const bgClass = COLORS[cat.color] || 'bg-gray-100 text-gray-500';
                 
-                div.innerHTML = `
-                    <label class="custom-checkbox relative flex items-center cursor-pointer pt-1">
-                        <input type="checkbox" class="sr-only" ${todo.completed ? 'checked' : ''} onchange="toggleTodo('${todo.id}')">
-                        <div class="w-5 h-5 border-2 border-gray-300 rounded-[6px] transition-all flex items-center justify-center bg-white hover:border-blue-400 shadow-sm">
-                            <svg class="w-3.5 h-3.5 text-white hidden pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                return `
+                <div class="flex items-center gap-3 p-3 bg-white rounded-xl active:bg-gray-50 transition border-b border-gray-50 last:border-0">
+                    <label class="custom-checkbox relative flex items-center justify-center w-6 h-6">
+                        <input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')">
+                        <div class="w-5 h-5 border-2 border-gray-300 rounded-md transition-colors flex items-center justify-center">
+                            <i data-lucide="check" class="w-3.5 h-3.5 text-white"></i>
                         </div>
                     </label>
-                    <div class="flex-1 min-w-0 cursor-pointer" onclick="openModal('todo', '${todo.id}')">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${badgeClass}">${category.name}</span>
-                        </div>
-                        <p class="text-sm font-medium text-gray-700 ${todo.completed ? 'line-through decoration-gray-400' : ''} truncate">${todo.text}</p>
+                    <div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')">
+                        <p class="font-medium text-gray-800 ${item.completed?'line-through text-gray-400':''} truncate text-base">${item.text}</p>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span>
                     </div>
-                    <button onclick="deleteItem('todo', '${todo.id}')" class="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                `;
-                list.appendChild(div);
-            });
+                    <button onclick="deleteItem('todo','${item.id}')" class="text-gray-300 p-2"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('');
+        }
+
+        function renderStats() {
+            document.getElementById('pending-count').innerText = state.todos.filter(t=>!t.completed).length;
+            document.getElementById('completed-count').innerText = state.todos.filter(t=>t.completed).length;
+            const today = DAYS_FULL[new Date().getDay() === 0 ? 0 : new Date().getDay()];
+            document.getElementById('today-events-count').innerText = state.schedule.filter(s=>s.day===today).length;
+        }
+
+        function renderCategoriesList() {
+            document.getElementById('categories-list').innerHTML = state.categories.map(c => `
+                <div class="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-${c.color}-500"></div>
+                        <span class="text-sm font-medium">${c.name}</span>
+                    </div>
+                    <button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
 
-        // --- Sistema de Notificaciones ---
-        function checkNotifications() {
-            const now = new Date();
-            const currentDayName = DAYS_FULL[now.getDay()]; 
-            const currentTime = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
-            const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime);
-
-            events.forEach(event => {
-                showToast(`Es hora de: ${event.title}`, 'Evento de Agenda');
-                
-                if (state.settings.browserNotifications && Notification.permission === "granted") {
-                    new Notification("MyDay OS", { body: `Es hora de: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg" });
-                }
-            });
+        // --- ACTIONS ---
+        function setDay(i) { state.currentDayIndex = i; render(); }
+        
+        function toggleTodo(id) {
+            const t = state.todos.find(x=>x.id===id);
+            if(t) { t.completed = !t.completed; saveData(); render(); }
+        }
+        
+        function deleteItem(type, id) {
+            if(!confirm('¿Eliminar?')) return;
+            if(type==='schedule') state.schedule = state.schedule.filter(x=>x.id!==id);
+            else state.todos = state.todos.filter(x=>x.id!==id);
+            saveData(); render();
         }
 
-        function showToast(message, title = 'Notificación') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification p-4 flex gap-3 items-start pointer-events-auto cursor-pointer hover:bg-white transition-colors';
-            toast.onclick = () => toast.remove();
-            
-            toast.innerHTML = `
-                <div class="bg-blue-100 p-2 rounded-full text-blue-600 shrink-0">
-                    <i data-lucide="bell" class="w-5 h-5"></i>
-                </div>
-                <div class="flex-1">
-                    <h4 class="text-sm font-bold text-gray-800">${title}</h4>
-                    <p class="text-xs text-gray-600 mt-1">${message}</p>
-                </div>
-            `;
-            
-            container.appendChild(toast);
-            lucide.createIcons();
-
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.4s forwards';
-                setTimeout(() => toast.remove(), 400);
-            }, 5000);
+        function handleAddCategory(e) { 
+            e.preventDefault(); const fd = new FormData(e.target); 
+            state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); 
+            saveData(); renderCategoriesList(); e.target.reset(); 
         }
-
-        function toggleBrowserNotifications() {
-            const checkbox = document.getElementById('browser-notify-toggle');
-            state.settings.browserNotifications = checkbox.checked;
-            saveData();
-
-            if (checkbox.checked && Notification.permission !== "granted") {
-                Notification.requestPermission().then(permission => {
-                    if (permission !== "granted") {
-                        alert("Permiso denegado por el navegador.");
-                        checkbox.checked = false;
-                        state.settings.browserNotifications = false;
-                        saveData();
-                    }
-                });
-            }
-        }
-
-        // --- Ajustes Avanzados ---
-        function switchSettingsTab(tabId) {
-            document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-            
-            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-                btn.classList.remove('bg-white', 'shadow-sm', 'text-blue-600');
-                if(btn.dataset.tab === tabId) btn.classList.add('bg-white', 'shadow-sm', 'text-blue-600');
-            });
-        }
-
-        function saveBackground() {
-            const url = document.getElementById('bg-url-input').value;
-            if(url) {
-                state.settings.bgUrl = url;
-                saveData();
-                applySettings();
-                showToast("Fondo actualizado correctamente");
-            }
-        }
-
-        function setPresetBg(type) {
-            const presets = {
-                nature: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2070&auto=format&fit=crop',
-                dark: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop',
-                abstract: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop'
-            };
-            state.settings.bgUrl = presets[type];
-            document.getElementById('bg-url-input').value = presets[type];
-            saveData();
-            applySettings();
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "myday_backup.json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
-        }
-
-        function importData(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedState = JSON.parse(e.target.result);
-                    state = { ...state, ...importedState };
-                    saveData();
-                    applySettings();
-                    renderApp();
-                    showToast("Datos restaurados con éxito");
-                    closeSettings();
-                } catch(err) {
-                    alert("Error al leer el archivo. Asegúrate de que es un JSON válido.");
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function resetAllData() {
-            if(confirm("ESTO BORRARÁ TODO. ¿Estás seguro?")) {
-                localStorage.removeItem('myDayOS_v3');
-                location.reload();
-            }
-        }
-
-        // --- Stats & Clock ---
-        function updateStats() {
-            const pending = state.todos.filter(t => !t.completed).length;
-            const completed = state.todos.filter(t => t.completed).length;
-            const now = new Date();
-            const dayName = DAYS_FULL[now.getDay()];
-            const todayEvents = state.schedule.filter(s => s.day === dayName).length;
-
-            document.getElementById('pending-count').textContent = pending;
-            document.getElementById('completed-count').textContent = completed;
-            document.getElementById('today-events-count').textContent = todayEvents;
-            document.getElementById('total-todos-badge').textContent = state.todos.length;
+        function deleteCategory(id) { 
+            if(state.categories.length>1 && confirm('¿Borrar?')) { 
+                state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); 
+            } 
         }
 
         function updateClock() {
@@ -980,87 +726,118 @@
             document.getElementById('live-date-full').textContent = dateFull;
         }
 
-        // --- Modales ---
-        function openSettings() {
-            document.getElementById('settings-modal').classList.remove('hidden');
-            document.getElementById('bg-url-input').value = state.settings.bgUrl;
-            switchSettingsTab('general');
-            renderCategoriesList();
-            if(state.settings.syncId) {
-                document.getElementById('sync-id-input').value = state.settings.syncId;
-                if (isCloudAvailable) {
-                    document.getElementById('sync-active-message').classList.remove('hidden');
-                }
-            }
-        }
-        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-
-        let currentModalConfig = { type: null, mode: 'create', id: null };
-        function openModal(type, id = null) {
+        // --- MODALS & UI ---
+        let modalConfig = {};
+        function openModal(type, id=null) {
+            modalConfig = {type, id};
             const modal = document.getElementById('modal');
-            const backdrop = document.getElementById('modal-backdrop');
             const content = document.getElementById('modal-content');
+            const backdrop = document.getElementById('modal-backdrop');
             const fields = document.getElementById('form-fields');
             
-            currentModalConfig = { type, mode: id ? 'edit' : 'create', id };
-            let data = id ? (type === 'schedule' ? state.schedule.find(s=>s.id===id) : state.todos.find(t=>t.id===id)) : null;
+            let data = id ? (type==='schedule'?state.schedule.find(x=>x.id===id):state.todos.find(x=>x.id===id)) : null;
+            document.getElementById('modal-title').innerText = id ? 'Editar' : (type==='schedule'?'Nuevo Evento':'Nueva Tarea');
+            
+            const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
+            const days = DAYS_FULL.map(d=>`<option value="${d}" ${data&&data.day===d?'selected':''}>${d}</option>`).join('');
+            
+            const inputClass = "w-full bg-gray-100 rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-blue-500 border-none transition-colors";
 
-            document.getElementById('modal-title').textContent = currentModalConfig.mode === 'create' ? (type==='schedule'?'Nuevo Evento':'Nueva Tarea') : 'Editar';
-            document.getElementById('modal-subtitle').textContent = type==='schedule'?'Agenda':'Lista de Tareas';
-
-            const catOptions = state.categories.map(c => `<option value="${c.id}" ${data && data.categoryId === c.id ? 'selected' : ''}>${c.name}</option>`).join('');
-            const dayOptions = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(d => `<option value="${d}" ${(data && data.day === d) || (!data && DAYS_FULL[new Date().getDay()] === d) ? 'selected' : ''}>${d}</option>`).join('');
-
-            if(type === 'schedule') {
+            if(type==='schedule') {
                 fields.innerHTML = `
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-100 outline-none"></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Día (Repetitivo)</label><select name="day" class="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none">${dayOptions}</select></div>
-                        <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none"></div>
+                    <input name="title" class="${inputClass} font-bold text-lg bg-white border border-gray-200" placeholder="Título del evento" value="${data?data.title:''}" required>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select name="day" class="${inputClass}">${days}</select>
+                        <input type="time" name="time" class="${inputClass}" value="${data?data.time:'09:00'}" required>
                     </div>
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Categoría</label><select name="categoryId" class="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none">${catOptions}</select></div>
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Notas</label><textarea name="desc" class="w-full px-4 py-2 bg-gray-50 border rounded-lg resize-none h-20 outline-none">${data?data.desc||'':''}</textarea></div>
+                    <select name="categoryId" class="${inputClass}">${cats}</select>
+                    <textarea name="desc" class="${inputClass} h-24 resize-none" placeholder="Notas...">${data?data.desc||'':''}</textarea>
                 `;
             } else {
                 fields.innerHTML = `
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="w-full px-4 py-2 bg-gray-50 border rounded-lg focus:ring-2 focus:ring-blue-100 outline-none"></div>
-                    <div><label class="block text-xs font-bold text-gray-500 uppercase mb-1">Categoría</label><select name="categoryId" class="w-full px-4 py-2 bg-gray-50 border rounded-lg outline-none">${catOptions}</select></div>
+                    <input name="text" class="${inputClass} font-bold text-lg bg-white border border-gray-200" placeholder="¿Qué hay que hacer?" value="${data?data.text:''}" required autoFocus>
+                    <select name="categoryId" class="${inputClass} mt-2">${cats}</select>
                 `;
             }
 
             modal.classList.remove('hidden');
-            setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.remove('opacity-0', 'scale-95'); content.classList.add('scale-100'); }, 10);
+            setTimeout(()=>{
+                backdrop.classList.remove('opacity-0');
+                content.classList.remove('translate-y-full', 'opacity-0', 'lg:scale-95');
+                content.classList.add('lg:scale-100');
+            },10);
         }
 
         function closeModal() {
             const modal = document.getElementById('modal');
-            document.getElementById('modal-backdrop').classList.add('opacity-0');
-            document.getElementById('modal-content').classList.remove('scale-100');
-            document.getElementById('modal-content').classList.add('opacity-0', 'scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
+            const content = document.getElementById('modal-content');
+            const backdrop = document.getElementById('modal-backdrop');
+            content.classList.add('translate-y-full', 'opacity-0', 'lg:scale-95');
+            content.classList.remove('lg:scale-100');
+            backdrop.classList.add('opacity-0');
+            setTimeout(()=>modal.classList.add('hidden'), 300);
         }
 
         function handleFormSubmit(e) {
             e.preventDefault();
             const fd = new FormData(e.target);
-            const { type, mode, id } = currentModalConfig;
+            const {type, id} = modalConfig;
             
-            if(type === 'schedule') {
-                const item = { id: mode==='create'?Date.now().toString():id, title: fd.get('title'), day: fd.get('day'), time: fd.get('time'), categoryId: fd.get('categoryId'), desc: fd.get('desc') };
-                if(mode==='create') state.schedule.push(item); else state.schedule[state.schedule.findIndex(i=>i.id===id)] = item;
+            if(type==='schedule') {
+                const item = {id: id||Date.now().toString(), title: fd.get('title'), day: fd.get('day'), time: fd.get('time'), categoryId: fd.get('categoryId'), desc: fd.get('desc')};
+                if(id) { const idx = state.schedule.findIndex(x=>x.id===id); state.schedule[idx]=item; }
+                else state.schedule.push(item);
             } else {
-                const item = { id: mode==='create'?Date.now().toString():id, text: fd.get('text'), categoryId: fd.get('categoryId'), completed: mode==='create'?false:state.todos.find(t=>t.id===id).completed };
-                if(mode==='create') state.todos.push(item); else state.todos[state.todos.findIndex(i=>i.id===id)] = item;
+                const item = {id: id||Date.now().toString(), text: fd.get('text'), categoryId: fd.get('categoryId'), completed: id?state.todos.find(x=>x.id===id).completed:false};
+                if(id) { const idx = state.todos.findIndex(x=>x.id===id); state.todos[idx]=item; }
+                else state.todos.push(item);
             }
-            saveData(); closeModal(); renderApp();
+            saveData(); closeModal(); render();
         }
 
-        function deleteItem(type, id) { if(confirm('¿Eliminar elemento?')) { if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); else state.todos=state.todos.filter(i=>i.id!==id); saveData(); renderApp(); } }
-        function toggleTodo(id) { const t = state.todos.find(i=>i.id===id); if(t) { t.completed = !t.completed; saveData(); renderApp(); } }
+        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); renderCategoriesList(); }
+        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+        
+        function switchSettingsTab(tab) {
+            document.querySelectorAll('.settings-content').forEach(x=>x.classList.add('hidden'));
+            document.getElementById('tab-'+tab).classList.remove('hidden');
+        }
+        
+        function setPresetBg(type) {
+            if(type==='white') state.settings.bgUrl = '';
+            else {
+                const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1200'};
+                state.settings.bgUrl = urls[type];
+            }
+            saveData(); applySettings();
+        }
+        function applySettings() {
+            if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`;
+            else document.body.style.backgroundImage = 'none';
+        }
 
-        function renderCategoriesList() { document.getElementById('categories-list').innerHTML = state.categories.map(c => `<div class="flex justify-between p-2 bg-gray-50 rounded mb-1"><span class="text-sm ${COLORS[c.color].split(' ')[1]} font-bold">${c.name}</span><button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
-        function handleAddCategory(e) { e.preventDefault(); const fd = new FormData(e.target); state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); saveData(); renderCategoriesList(); e.target.reset(); }
-        function deleteCategory(id) { if(state.categories.length>1 && confirm('¿Borrar categoría?')) { state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); } }
+        function showToast(msg, title) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification bg-white/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/50 flex gap-3 animate-slideUp';
+            toast.innerHTML = `<div class="bg-blue-100 p-2 rounded-full text-blue-600"><i data-lucide="bell" class="w-4 h-4"></i></div><div><h4 class="font-bold text-sm">${title}</h4><p class="text-xs text-gray-500">${msg}</p></div>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(()=>toast.remove(), 4000);
+        }
+
+        // Data helpers
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const a = document.createElement('a'); a.href = dataStr; a.download = "myday_backup.json"; a.click();
+        }
+        function importData(input) {
+            const file = input.files[0]; if(!file) return;
+            const r = new FileReader();
+            r.onload = e => { try { state = {...state, ...JSON.parse(e.target.result)}; saveData(); render(); closeSettings(); } catch(e){alert('Error JSON');} };
+            r.readAsText(file);
+        }
+        function resetAllData() { if(confirm('¿Borrar todo?')) { localStorage.removeItem('myDayOS_v3'); location.reload(); } }
 
         init();
     </script>
