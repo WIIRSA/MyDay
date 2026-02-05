@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f2f2f7">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Favicon agregado -->
+    <!-- Favicon -->
     <link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg" type="image/svg+xml">
     <title>MyDay OS 3.0 - Google Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,7 +20,7 @@
         }
     </script>
     <style>
-        /* Tipografía estilo Apple */
+        /* Base */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             transition: background-image 0.5s ease-in-out, background-color 0.3s ease, color 0.3s ease;
@@ -31,24 +31,20 @@
             overscroll-behavior-y: none;
         }
 
-        /* --- VARIABLES DE TEMA --- */
+        /* Variables */
         :root {
-            /* Light Mode Suave (Soft Mesh Gradient) */
             --bg-color: #f3f4f6;
-            /* Gradiente suave estilo "Aurora" para evitar blanco puro */
             --bg-image-default: radial-gradient(at 0% 0%, hsla(253,16%,90%,1) 0, transparent 50%), 
                                 radial-gradient(at 50% 0%, hsla(225,100%,94%,1) 0, transparent 50%), 
                                 radial-gradient(at 100% 0%, hsla(339,100%,94%,1) 0, transparent 50%),
                                 linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
-            
-            --glass-bg: rgba(255, 255, 255, 0.65); /* Más transparente para ver el fondo */
+            --glass-bg: rgba(255, 255, 255, 0.65);
             --glass-border: rgba(255, 255, 255, 0.4);
             --sidebar-bg: rgba(255, 255, 255, 0.5);
-            
             --text-main: #2c2c2e;
             --text-muted: #8e8e93;
             --card-bg: rgba(255, 255, 255, 0.6);
-            --modal-bg: #fafafa; /* Blanco roto */
+            --modal-bg: #fafafa;
             --input-bg: rgba(255, 255, 255, 0.5);
             --nav-bg: rgba(255, 255, 255, 0.85);
             --accent-color: #007aff; 
@@ -57,14 +53,11 @@
         }
 
         [data-theme="dark"] {
-            /* Dark Mode - macOS Neutral */
             --bg-color: #000000;
-            --bg-image-default: none; /* Fondo negro limpio en modo oscuro */
-            
+            --bg-image-default: none;
             --glass-bg: rgba(28, 28, 30, 0.75);
             --glass-border: rgba(255, 255, 255, 0.1);
             --sidebar-bg: rgba(30, 30, 32, 0.6);
-            
             --text-main: #e5e5e7;
             --text-muted: #98989d;
             --card-bg: rgba(44, 44, 46, 0.5);
@@ -81,109 +74,48 @@
             color: var(--text-main);
         }
 
-        /* Clases de utilidad para Acento */
+        /* Utilities */
         .text-accent { color: var(--accent-color) !important; }
         .bg-accent { background-color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
-        .ring-accent { --tw-ring-color: var(--accent-color) !important; }
-        .hover\:bg-accent:hover { background-color: var(--accent-color) !important; }
-        
-        /* Botones primarios con acento */
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-        }
-        .btn-primary:hover {
-            opacity: 0.9;
-        }
+        .btn-primary { background-color: var(--accent-color); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
 
-        /* --- ESTILOS DE ESCRITORIO --- */
+        /* Desktop Glass */
         .glass-panel {
             background: var(--glass-bg);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.12); /* Sombra más suave */
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.12);
         }
-
         .glass-sidebar {
             background: var(--sidebar-bg);
             backdrop-filter: blur(40px);
             border-right: 1px solid var(--glass-border);
         }
 
-        /* Adaptación de componentes al tema */
-        .theme-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--glass-border);
-        }
-        
-        .theme-modal {
-            background-color: var(--modal-bg);
-            color: var(--text-main);
-        }
+        .theme-card { background-color: var(--card-bg); border: 1px solid var(--glass-border); }
+        .theme-modal { background-color: var(--modal-bg); color: var(--text-main); }
+        .theme-input { background-color: var(--input-bg); color: var(--text-main); border: 1px solid transparent; }
+        .theme-input:focus { background-color: var(--modal-bg); border-color: var(--accent-color); outline: 2px solid var(--accent-color); outline-offset: -1px; }
 
-        .theme-input {
-            background-color: var(--input-bg);
-            color: var(--text-main);
-            border: 1px solid transparent;
-        }
-        .theme-input:focus {
-            background-color: var(--modal-bg);
-            border-color: var(--accent-color);
-            outline: 2px solid var(--accent-color);
-            outline-offset: -1px;
-        }
-
-        /* --- ADAPTACIÓN MÓVIL --- */
+        /* Mobile */
         @media (max-width: 768px) {
-            body {
-                padding: 0 !important;
-                background-image: none !important;
-                background-color: var(--bg-color) !important; /* En móvil usamos color solido para rendimiento o el gradiente si se prefiere */
-            }
-            
-            /* Permitir gradiente en móvil si no es pesado */
-            body {
-               background-image: var(--bg-image-default) !important;
-            }
-
-            .glass-panel {
-                width: 100% !important;
-                height: 100dvh !important;
-                max-width: none !important;
-                border-radius: 0 !important;
-                border: none !important;
-                box-shadow: none !important;
-                background: transparent !important; /* Dejar ver el body */
-            }
-
+            body { padding: 0 !important; background-image: none !important; background-color: var(--bg-color) !important; }
+            body { background-image: var(--bg-image-default) !important; } /* Restore gradient if desired */
+            .glass-panel { width: 100% !important; height: 100dvh !important; max-width: none !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important; }
             .mobile-hidden { display: none !important; }
             .mobile-flex { display: flex !important; }
-            
             #settings-modal > div { height: 100%; width: 100%; border-radius: 0; }
-            
-            .mobile-nav {
-                background-color: var(--nav-bg);
-                border-top: 1px solid var(--glass-border);
-            }
+            .mobile-nav { background-color: var(--nav-bg); border-top: 1px solid var(--glass-border); }
         }
 
-        /* Utilidades */
-        .toast-notification {
-            background-color: var(--toast-bg);
-            color: var(--text-main);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--toast-border);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-            border-radius: 16px;
-            animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+        .toast-notification { background-color: var(--toast-bg); color: var(--text-main); backdrop-filter: blur(20px); border: 1px solid var(--toast-border); box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-radius: 16px; animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideInRight { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
@@ -200,11 +132,21 @@
         
         .nav-btn-active { color: var(--accent-color) !important; }
         .settings-tab-active { background-color: var(--card-bg); color: var(--accent-color) !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        /* Masonry Grid for Notes */
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .notes-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+        }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white transition-colors duration-300" id="app-body">
 
-    <!-- Contenedor Principal -->
+    <!-- Main Container -->
     <main class="w-full max-w-7xl h-[92vh] glass-panel rounded-2xl flex flex-col overflow-hidden relative fade-in">
         
         <!-- Header -->
@@ -215,22 +157,26 @@
                 <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
             </div>
             
-            <div class="text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
+            <!-- Desktop Nav Buttons (Center) -->
+            <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-1 bg-black/5 dark:bg-white/10 p-1 rounded-lg backdrop-blur-sm">
+                <button onclick="switchView('productivity')" id="desk-nav-prod" class="px-3 py-1 rounded-md text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-accent">Día</button>
+                <button onclick="switchView('notes')" id="desk-nav-notes" class="px-3 py-1 rounded-md text-xs font-medium transition-all text-muted hover:bg-white/50 dark:hover:bg-white/20" style="color: var(--text-muted);">Notas</button>
+            </div>
+            
+            <!-- Title (Mobile) -->
+            <div class="md:hidden text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
                 <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
-                <span class="hidden sm:inline">MyDay OS</span>
-                <span class="sm:hidden">MyDay</span>
+                <span id="header-title">MyDay</span>
             </div>
 
+            <!-- Actions -->
             <div class="flex items-center gap-4">
                 <div id="sync-status-indicator" class="sync-badge sync-offline hidden sm:flex" title="Estado">
                     <div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local
                 </div>
-                
-                <!-- Botón Tema -->
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
                     <i id="theme-icon" data-lucide="moon" class="w-5 h-5 opacity-80" style="color: var(--text-main);"></i>
                 </button>
-
                 <div id="user-avatar" class="hidden w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold overflow-hidden border border-white/20 shadow-sm">
                     <img id="user-photo" src="" alt="User" class="w-full h-full object-cover">
                 </div>
@@ -239,76 +185,95 @@
                 </button>
                 <div class="text-right hidden sm:block">
                     <div id="live-clock" class="text-sm font-medium tabular-nums leading-none" style="color: var(--text-main);">--:--</div>
-                    <div id="live-date-full" class="text-[10px] font-medium uppercase tracking-wider leading-none mt-1 opacity-70" style="color: var(--text-muted);">Cargando...</div>
                 </div>
             </div>
         </header>
 
-        <!-- Cuerpo de la App -->
+        <!-- APP BODY WRAPPER -->
         <div class="flex flex-1 overflow-hidden relative">
             
-            <!-- VISTA 1: AGENDA -->
-            <section id="view-agenda" class="w-full md:w-[35%] glass-sidebar flex flex-col md:min-w-[320px] md:max-w-md relative z-10 transition-all mobile-flex">
-                <div class="p-5 pb-2 border-b" style="border-bottom-color: var(--glass-border);">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold flex items-center gap-2 tracking-tight" style="color: var(--text-main);">
-                            <i data-lucide="calendar" class="w-5 h-5 text-accent"></i> Agenda
-                        </h2>
-                        <button onclick="openModal('schedule')" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:shadow text-accent flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-black/5 dark:border-white/10">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                    <div class="flex justify-between p-1 rounded-xl mb-2 overflow-x-auto no-scrollbar" id="day-selector" style="background-color: rgba(120, 120, 128, 0.1);"></div>
-                </div>
-                <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 md:pb-4" id="schedule-list"></div>
-                <div class="hidden md:flex p-3 border-t text-xs text-center font-medium justify-between px-6" style="border-top-color: var(--glass-border); color: var(--text-muted); background-color: var(--glass-bg);">
-                    <span id="schedule-summary">0 eventos</span>
-                    <span class="text-accent cursor-pointer hover:underline" onclick="goToToday()">Ir a Hoy</span>
-                </div>
-            </section>
-
-            <!-- VISTA 2: TAREAS -->
-            <section id="view-tasks" class="flex-1 flex-col relative w-full mobile-hidden md:flex">
-                <div class="p-4 md:p-6 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
-                    <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Pendientes</span><i data-lucide="list-todo" class="w-4 h-4 text-orange-500"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="pending-count">0</span>
-                    </div>
-                    <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Hoy</span><i data-lucide="clock" class="w-4 h-4 text-accent"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="today-events-count">0</span>
-                    </div>
-                    <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28 col-span-2 md:col-span-1">
-                        <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Historial</span><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i></div>
-                        <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="completed-count">0</span>
-                    </div>
-                </div>
-
-                <div class="flex-1 mx-2 md:mx-4 mb-20 md:mb-4 theme-card rounded-2xl shadow-sm flex flex-col overflow-hidden">
-                    <div class="p-4 md:p-5 flex justify-between items-center border-b sticky top-0 z-10 backdrop-blur-md" style="border-bottom-color: var(--glass-border); background-color: rgba(255,255,255,0.05);">
-                        <div class="flex items-center gap-2">
-                            <h3 class="text-lg font-bold" style="color: var(--text-main);">Tareas</h3>
-                            <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-bold" id="total-todos-badge">0</span>
+            <!-- VISTA: PRODUCTIVIDAD (Agenda + Tareas) -->
+            <div id="app-productivity" class="flex flex-1 w-full h-full transition-opacity duration-300">
+                <!-- Agenda -->
+                <section id="view-agenda" class="w-full md:w-[35%] glass-sidebar flex flex-col md:min-w-[320px] md:max-w-md relative z-10 transition-all mobile-flex">
+                    <div class="p-5 pb-2 border-b" style="border-bottom-color: var(--glass-border);">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold flex items-center gap-2 tracking-tight" style="color: var(--text-main);">
+                                <i data-lucide="calendar" class="w-5 h-5 text-accent"></i> Agenda
+                            </h2>
+                            <button onclick="openModal('schedule')" class="w-8 h-8 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:shadow text-accent flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-black/5 dark:border-white/10">
+                                <i data-lucide="plus" class="w-4 h-4"></i>
+                            </button>
                         </div>
-                        <button onclick="openModal('todo')" class="text-sm font-medium px-4 py-2 rounded-xl btn-primary shadow-lg hover:shadow-xl transition-all flex items-center gap-2 active:scale-95">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">Nueva</span>
-                        </button>
+                        <div class="flex justify-between p-1 rounded-xl mb-2 overflow-x-auto no-scrollbar" id="day-selector" style="background-color: rgba(120, 120, 128, 0.1);"></div>
                     </div>
-                    <div class="flex-1 overflow-y-auto p-2" id="todo-list"></div>
+                    <div class="flex-1 overflow-y-auto p-4 space-y-3 pb-24 md:pb-4" id="schedule-list"></div>
+                    <div class="hidden md:flex p-3 border-t text-xs text-center font-medium justify-between px-6" style="border-top-color: var(--glass-border); color: var(--text-muted); background-color: var(--glass-bg);">
+                        <span id="schedule-summary">0 eventos</span>
+                        <span class="text-accent cursor-pointer hover:underline" onclick="goToToday()">Ir a Hoy</span>
+                    </div>
+                </section>
+
+                <!-- Tareas -->
+                <section id="view-tasks" class="flex-1 flex-col relative w-full mobile-hidden md:flex">
+                    <div class="p-4 md:p-6 grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5">
+                        <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
+                            <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Pendientes</span><i data-lucide="list-todo" class="w-4 h-4 text-orange-500"></i></div>
+                            <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="pending-count">0</span>
+                        </div>
+                        <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28">
+                            <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Hoy</span><i data-lucide="clock" class="w-4 h-4 text-accent"></i></div>
+                            <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="today-events-count">0</span>
+                        </div>
+                        <div class="theme-card p-4 rounded-2xl shadow-sm flex flex-col justify-between h-24 md:h-28 col-span-2 md:col-span-1">
+                            <div class="flex justify-between items-start"><span class="text-[10px] md:text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">Historial</span><i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i></div>
+                            <span class="text-2xl md:text-3xl font-bold" style="color: var(--text-main);" id="completed-count">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 mx-2 md:mx-4 mb-20 md:mb-4 theme-card rounded-2xl shadow-sm flex flex-col overflow-hidden">
+                        <div class="p-4 md:p-5 flex justify-between items-center border-b sticky top-0 z-10 backdrop-blur-md" style="border-bottom-color: var(--glass-border); background-color: rgba(255,255,255,0.05);">
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-bold" style="color: var(--text-main);">Tareas</h3>
+                                <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-bold" id="total-todos-badge">0</span>
+                            </div>
+                            <button onclick="openModal('todo')" class="text-sm font-medium px-4 py-2 rounded-xl btn-primary shadow-lg hover:shadow-xl transition-all flex items-center gap-2 active:scale-95">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> <span class="hidden sm:inline">Nueva</span>
+                            </button>
+                        </div>
+                        <div class="flex-1 overflow-y-auto p-2" id="todo-list"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- VISTA: NOTAS (Oculta por defecto) -->
+            <div id="app-notes" class="hidden flex-1 w-full h-full p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 animate-fadeIn">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold" style="color: var(--text-main);">Mis Notas</h2>
+                    <button onclick="openModal('note')" class="text-sm font-medium px-4 py-2 rounded-xl btn-primary shadow-lg hover:shadow-xl transition-all flex items-center gap-2 active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Crear Nota
+                    </button>
                 </div>
-            </section>
+                <div id="notes-grid" class="notes-grid">
+                    <!-- Notas Renderizadas Aquí -->
+                </div>
+            </div>
+
         </div>
 
-        <!-- BARRA DE NAVEGACIÓN MÓVIL -->
-        <nav class="md:hidden absolute bottom-0 left-0 right-0 h-16 mobile-nav flex justify-around items-center z-50 pb-safe backdrop-blur-xl">
-            <button onclick="switchMobileView('agenda')" class="flex flex-col items-center justify-center w-full h-full nav-btn nav-btn-active" id="btn-nav-agenda" style="color: var(--text-muted);">
-                <i data-lucide="calendar-days" class="w-6 h-6 mb-0.5"></i>
+        <!-- BARRA DE NAVEGACIÓN MÓVIL (3 Íconos) -->
+        <nav class="md:hidden absolute bottom-0 left-0 right-0 h-20 mobile-nav flex justify-around items-center z-50 pb-safe backdrop-blur-xl px-2">
+            <button onclick="switchView('agenda')" class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all nav-btn nav-btn-active" id="btn-nav-agenda" style="color: var(--text-muted);">
+                <i data-lucide="calendar-days" class="w-6 h-6 mb-1"></i>
                 <span class="text-[10px] font-medium">Agenda</span>
             </button>
-            <div class="w-px h-8 bg-gray-300 dark:bg-gray-700"></div>
-            <button onclick="switchMobileView('tasks')" class="flex flex-col items-center justify-center w-full h-full nav-btn" id="btn-nav-tasks" style="color: var(--text-muted);">
-                <i data-lucide="check-square" class="w-6 h-6 mb-0.5"></i>
+            <button onclick="switchView('tasks')" class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all nav-btn" id="btn-nav-tasks" style="color: var(--text-muted);">
+                <i data-lucide="check-square" class="w-6 h-6 mb-1"></i>
                 <span class="text-[10px] font-medium">Tareas</span>
+            </button>
+            <button onclick="switchView('notes')" class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all nav-btn" id="btn-nav-notes" style="color: var(--text-muted);">
+                <i data-lucide="sticky-note" class="w-6 h-6 mb-1"></i>
+                <span class="text-[10px] font-medium">Notas</span>
             </button>
         </nav>
 
@@ -358,8 +323,6 @@
                     <!-- Pestaña General -->
                     <div id="tab-general" class="settings-content block">
                         <h2 class="text-xl font-bold mb-4">Personalización</h2>
-                        
-                        <!-- URL Input -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Imagen Personalizada</label>
                             <div class="flex gap-2">
@@ -367,8 +330,6 @@
                                 <button onclick="saveBackground()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm">Aplicar</button>
                             </div>
                         </div>
-
-                        <!-- Zona Horaria -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Zona Horaria</label>
                             <select id="timezone-select" onchange="saveTimezone()" class="theme-input w-full rounded-xl px-4 py-2 text-sm outline-none">
@@ -384,8 +345,6 @@
                                 <option value="America/Lima">🇵🇪 Lima (PET)</option>
                             </select>
                         </div>
-
-                        <!-- Color de Acento -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Color de Acento</label>
                             <div class="flex gap-3 flex-wrap">
@@ -397,8 +356,6 @@
                                 <button onclick="setAccentColor('#ff3b30')" class="w-8 h-8 rounded-full bg-red-500 ring-2 ring-transparent hover:ring-red-300 transition-all"></button>
                             </div>
                         </div>
-
-                        <!-- Presets -->
                         <div>
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Fondos Predeterminados</label>
                             <div class="flex gap-3 flex-wrap">
@@ -454,7 +411,7 @@
 
         let state = {
             currentDayIndex: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-            schedule: [], todos: [],
+            schedule: [], todos: [], notes: [],
             categories: [{id:'c1',name:'Clase',color:'blue'}, {id:'c2',name:'Tarea',color:'orange'}, {id:'c3',name:'Ocio',color:'purple'}, {id:'c4',name:'Urgente',color:'red'}],
             settings: { bgUrl: '', browserNotifications: false, theme: 'light', timezone: 'system', accentColor: '#007aff' }
         };
@@ -480,7 +437,7 @@
             updateClock();
         }
 
-        // --- TIMEZONE & CLOCK ---
+        // --- CORE FUNCTIONS ---
         function getNowInTimezone() {
             const now = new Date();
             if (state.settings.timezone === 'system') return now;
@@ -488,243 +445,115 @@
             return new Date(tzString);
         }
 
-        function getCurrentDayName() { return DAYS_FULL[getNowInTimezone().getDay()]; }
-
-        function updateClock() {
-            const now = new Date();
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            if (state.settings.timezone !== 'system') { timeOptions.timeZone = state.settings.timezone; dateOptions.timeZone = state.settings.timezone; }
-            const timeStr = now.toLocaleTimeString('es-ES', timeOptions);
-            const dateFull = now.toLocaleDateString('es-ES', dateOptions);
-            const timeEl = document.getElementById('live-clock'); if(timeEl) timeEl.textContent = timeStr;
-            const dateEl = document.getElementById('live-date-full'); if(dateEl) dateEl.textContent = dateFull;
-        }
-
-        function saveTimezone() {
-            const select = document.getElementById('timezone-select');
-            state.settings.timezone = select.value;
-            saveData(); updateClock(); renderDays(); renderSchedule();
-            showToast(`Hora cambiada`, 'Sistema');
-        }
-
-        // --- THEME & ACCENT ---
-        function toggleTheme() {
-            state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light';
-            saveData(); applyTheme();
-        }
-
-        function applyTheme() {
-            const html = document.documentElement;
-            const icon = document.getElementById('theme-icon');
-            if (state.settings.theme === 'dark') {
-                html.setAttribute('data-theme', 'dark'); html.classList.add('dark');
-                if(icon) { icon.setAttribute('data-lucide', 'sun'); icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>'; }
+        function switchView(view) {
+            const prod = document.getElementById('app-productivity');
+            const notes = document.getElementById('app-notes');
+            const btnProd = document.getElementById('desk-nav-prod');
+            const btnNotes = document.getElementById('desk-nav-notes');
+            
+            // Desktop Nav
+            if(view === 'notes') {
+                prod.classList.add('hidden');
+                notes.classList.remove('hidden');
+                btnNotes.classList.remove('text-muted'); btnNotes.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent');
+                btnProd.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent'); btnProd.classList.add('text-muted');
             } else {
-                html.removeAttribute('data-theme'); html.classList.remove('dark');
-                if(icon) { icon.setAttribute('data-lucide', 'moon'); icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>'; }
-            }
-        }
-
-        function setAccentColor(color) {
-            state.settings.accentColor = color;
-            saveData();
-            applySettings();
-            render(); // Redraw UI to update inline colors
-        }
-
-        // --- RENDER ---
-        function render() {
-            renderDays(); renderSchedule(); renderTodos(); renderStats(); applySettings(); lucide.createIcons();
-        }
-
-        function switchMobileView(view) {
-            const agenda = document.getElementById('view-agenda'), tasks = document.getElementById('view-tasks');
-            const btnAgenda = document.getElementById('btn-nav-agenda'), btnTasks = document.getElementById('btn-nav-tasks');
-            if (view === 'agenda') {
-                agenda.classList.remove('mobile-hidden'); agenda.classList.add('mobile-flex');
-                tasks.classList.add('mobile-hidden'); tasks.classList.remove('mobile-flex');
-                btnAgenda.classList.add('nav-btn-active'); btnAgenda.style.color = 'var(--accent-color)';
-                btnTasks.classList.remove('nav-btn-active'); btnTasks.style.color = 'var(--text-muted)';
-            } else {
-                tasks.classList.remove('mobile-hidden'); tasks.classList.add('mobile-flex');
-                agenda.classList.add('mobile-hidden'); agenda.classList.remove('mobile-flex');
-                btnTasks.classList.add('nav-btn-active'); btnTasks.style.color = 'var(--accent-color)';
-                btnAgenda.classList.remove('nav-btn-active'); btnAgenda.style.color = 'var(--text-muted)';
-            }
-        }
-
-        function renderStats() {
-            const today = getCurrentDayName();
-            const pEl = document.getElementById('pending-count'); if(pEl) pEl.textContent = state.todos.filter(t => !t.completed).length;
-            const cEl = document.getElementById('completed-count'); if(cEl) cEl.textContent = state.todos.filter(t => t.completed).length;
-            const tEl = document.getElementById('today-events-count'); if(tEl) tEl.textContent = state.schedule.filter(s => s.day === today).length;
-            const bEl = document.getElementById('total-todos-badge'); if(bEl) bEl.textContent = state.todos.length;
-        }
-
-        function renderDays() {
-            const now = getNowInTimezone(); 
-            const currentDayNum = now.getDay(); 
-            const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); 
-            const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff));
-            const todayString = now.toDateString();
-            let html = '';
-            for(let i=0; i<7; i++) {
-                let d = new Date(monday); d.setDate(monday.getDate() + i);
-                const isSel = i === state.currentDayIndex; const isToday = d.toDateString() === todayString; 
-                const dayNameShort = DAYS_FULL[d.getDay() === 0 ? 0 : d.getDay()].substring(0,3);
-                // Inline styles for dynamic accent color
-                const selStyle = isSel ? `color: var(--accent-color);` : `color: var(--text-muted);`;
-                const todayDot = isToday ? `<span class="w-1 h-1 rounded-full mt-1 bg-accent"></span>` : '';
-                const activeClass = isSel ? 'bg-white dark:bg-gray-700 shadow-md scale-105' : 'bg-transparent';
+                notes.classList.add('hidden');
+                prod.classList.remove('hidden');
+                btnProd.classList.remove('text-muted'); btnProd.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent');
+                btnNotes.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent'); btnNotes.classList.add('text-muted');
                 
-                html += `<button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${activeClass}" style="${selStyle}"><span class="text-[10px] font-bold uppercase">${dayNameShort}</span><span class="text-lg font-bold">${d.getDate()}</span>${todayDot}</button>`;
-            }
-            document.getElementById('day-selector').innerHTML = html;
-        }
-
-        function setDay(i) { state.currentDayIndex = i; render(); }
-        function goToToday() { const now = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; setDay(dayIndex); }
-
-        function renderSchedule() {
-            const list = document.getElementById('schedule-list');
-            const now = new Date(); const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); const monday = new Date(now.setDate(diff));
-            const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex);
-            const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
-            const items = state.schedule.filter(s => s.day === dayName).sort((a,b)=>a.time.localeCompare(b.time));
-            if(items.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-64 opacity-40"><i data-lucide="coffee" class="w-12 h-12 mb-2"></i><p class="text-sm">Nada para el ${dayName}</p></div>`; return; }
-            list.innerHTML = items.map(item => {
-                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
-                const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
-                return `<div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-200 dark:border-gray-700 pr-2 pt-1"><span class="font-bold text-sm" style="color: var(--text-main);">${item.time}</span></div><div class="flex-1 min-w-0 pr-8"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">${cat.name}</span></div><h3 class="font-bold truncate text-lg" style="color: var(--text-main);">${item.title}</h3>${item.desc ? `<p class="text-sm truncate" style="color: var(--text-muted);">${item.desc}</p>` : ''}</div><button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 opacity-40 hover:opacity-100 hover:text-red-500 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
-            }).join('');
-        }
-
-        function renderTodos() {
-            const list = document.getElementById('todo-list');
-            const items = state.todos.sort((a,b) => a.completed - b.completed);
-            if(items.length === 0) { list.innerHTML = '<div class="p-8 text-center text-sm opacity-50">Sin tareas pendientes</div>'; return; }
-            list.innerHTML = items.map(item => {
-                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
-                const bgClass = COLORS[cat.color] || 'bg-gray-100 text-gray-500';
-                return `<div class="flex items-center gap-3 p-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
-            }).join('');
-        }
-
-        // --- AUTH ---
-        function setupAuthListener() {
-            if(!isCloudAvailable) return;
-            auth.onAuthStateChanged(user => {
-                currentUser = user;
-                if(user) {
-                    document.getElementById('auth-ui').classList.add('hidden');
-                    document.getElementById('user-ui').classList.remove('hidden');
-                    document.getElementById('user-avatar').classList.remove('hidden');
-                    document.getElementById('user-photo').src = user.photoURL;
-                    document.getElementById('user-img-settings').src = user.photoURL;
-                    document.getElementById('user-name-settings').innerText = user.displayName;
-                    const status = document.getElementById('sync-status-indicator');
-                    if(status) { status.className = 'sync-badge sync-active hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Nube'; }
-                    activateFirestoreSync(user.uid);
-                } else {
-                    document.getElementById('auth-ui').classList.remove('hidden');
-                    document.getElementById('user-ui').classList.add('hidden');
-                    document.getElementById('user-avatar').classList.add('hidden');
-                    const status = document.getElementById('sync-status-indicator');
-                    if(status) { status.className = 'sync-badge sync-offline hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local'; }
-                    if(unsubscribeSnapshot) unsubscribeSnapshot();
-                }
-            });
-        }
-
-        function activateFirestoreSync(uid) {
-            if(unsubscribeSnapshot) unsubscribeSnapshot();
-            const docRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('data').doc('main');
-            let firstLoad = true;
-            unsubscribeSnapshot = docRef.onSnapshot((doc) => {
-                if(doc.exists && !isSaving) {
-                    const remoteData = doc.data();
-                    state.schedule = remoteData.schedule || [];
-                    state.todos = remoteData.todos || [];
-                    state.categories = remoteData.categories || state.categories;
-                    if(remoteData.settings) { 
-                        state.settings = {...state.settings, ...remoteData.settings};
+                // Handle sub-views for mobile
+                if(view === 'agenda' || view === 'tasks') {
+                    const agenda = document.getElementById('view-agenda');
+                    const tasks = document.getElementById('view-tasks');
+                    if(view === 'agenda') {
+                        agenda.classList.remove('mobile-hidden'); agenda.classList.add('mobile-flex');
+                        tasks.classList.add('mobile-hidden'); tasks.classList.remove('mobile-flex');
+                    } else {
+                        tasks.classList.remove('mobile-hidden'); tasks.classList.add('mobile-flex');
+                        agenda.classList.add('mobile-hidden'); agenda.classList.remove('mobile-flex');
                     }
-                    render();
-                    if(!firstLoad) showToast('Datos actualizados', 'Nube');
-                } else if(!doc.exists && (state.schedule.length > 0 || state.todos.length > 0)) { saveDataToCloud(); }
-                firstLoad = false;
-            });
-        }
-
-        function loginWithGoogle() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p); }
-        function logout() { auth.signOut(); }
-
-        async function saveData() {
-            localStorage.setItem('myDayOS_v3', JSON.stringify(state));
-            renderStats();
-            if(isCloudAvailable && currentUser) saveDataToCloud();
-        }
-
-        let saveTimeout;
-        function saveDataToCloud() {
-            if (!isCloudAvailable || !currentUser) return;
-            clearTimeout(saveTimeout); isSaving = true;
-            saveTimeout = setTimeout(async () => {
-                try {
-                    const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main');
-                    await docRef.set({ schedule: state.schedule, todos: state.todos, categories: state.categories, settings: state.settings, lastUpdated: new Date() });
-                } catch(e) { console.error(e); } isSaving = false;
-            }, 1000);
-        }
-
-        // --- SETTINGS ---
-        function openSettings() {
-            document.getElementById('settings-modal').classList.remove('hidden');
-            const tzSelect = document.getElementById('timezone-select');
-            if(tzSelect) tzSelect.value = state.settings.timezone || 'system';
-            const bgInput = document.getElementById('bg-url-input');
-            if(bgInput) bgInput.value = state.settings.bgUrl || '';
-            switchSettingsTab('general');
-            renderCategoriesList();
-        }
-
-        function closeSettings() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-
-        function switchSettingsTab(tabId) {
-            document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-                if(btn.dataset.tab === tabId) {
-                    btn.classList.add('settings-tab-active');
-                    btn.style.color = 'var(--accent-color)';
-                } else {
-                    btn.classList.remove('settings-tab-active');
-                    btn.style.color = 'var(--text-main)';
                 }
+            }
+
+            // Mobile Nav Active State
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('nav-btn-active');
+                btn.style.color = 'var(--text-muted)';
             });
+            const activeBtn = document.getElementById(`btn-nav-${view === 'productivity' ? 'agenda' : view}`);
+            if(activeBtn) {
+                activeBtn.classList.add('nav-btn-active');
+                activeBtn.style.color = 'var(--accent-color)';
+            }
         }
 
-        // --- MODALS ---
+        function render() {
+            renderDays(); renderSchedule(); renderTodos(); renderNotes(); renderStats(); applySettings(); lucide.createIcons();
+        }
+
+        // --- NOTES LOGIC ---
+        function renderNotes() {
+            const grid = document.getElementById('notes-grid');
+            if(!state.notes || state.notes.length === 0) {
+                grid.innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i data-lucide="sticky-note" class="w-12 h-12 mx-auto mb-3"></i><p>No hay notas</p></div>';
+                return;
+            }
+            grid.innerHTML = state.notes.map(note => `
+                <div class="theme-card p-4 rounded-2xl shadow-sm cursor-pointer hover:shadow-md transition-all relative group break-inside-avoid" style="border-left: 4px solid ${note.color || 'var(--accent-color)'}" onclick="openModal('note', '${note.id}')">
+                    <h3 class="font-bold text-lg mb-1 line-clamp-1" style="color:var(--text-main)">${note.title}</h3>
+                    <p class="text-sm opacity-70 line-clamp-4 whitespace-pre-wrap" style="color:var(--text-main)">${note.content}</p>
+                    <div class="mt-3 text-[10px] opacity-40 font-medium">${new Date(note.date).toLocaleDateString()}</div>
+                    <button onclick="event.stopPropagation(); deleteItem('note', '${note.id}')" class="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:bg-red-50 rounded"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+            `).join('');
+        }
+
+        // --- MODALS & FORMS ---
         let modalConfig = {};
         function openModal(type, id = null) {
             modalConfig = {type, id};
             const modal = document.getElementById('modal'), content = document.getElementById('modal-content'), backdrop = document.getElementById('modal-backdrop'), fields = document.getElementById('form-fields');
-            let data = id ? (type==='schedule'?state.schedule.find(x=>x.id===id):state.todos.find(x=>x.id===id)) : null;
+            let data = null;
+            if(id) {
+                if(type === 'schedule') data = state.schedule.find(x => x.id === id);
+                else if(type === 'todo') data = state.todos.find(x => x.id === id);
+                else if(type === 'note') data = state.notes.find(x => x.id === id);
+            }
+            
             document.getElementById('modal-title').textContent = id ? 'Editar' : 'Nuevo';
-            document.getElementById('modal-subtitle').textContent = type==='schedule' ? 'Evento en agenda' : 'Tarea pendiente';
-            const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
-            const days = DAYS_FULL.map(d=>`<option value="${d}" ${(data&&data.day===d)||(!data&&DAYS_FULL[new Date().getDay()===0?0:new Date().getDay()]===d)?'selected':''}>${d}</option>`).join('');
-            const inputClass = "w-full px-4 py-2.5 rounded-xl theme-input border outline-none transition-colors";
+            const inputClass = "w-full px-4 py-3 rounded-xl theme-input border outline-none transition-colors";
 
-            if(type === 'schedule') {
+            if (type === 'note') {
+                document.getElementById('modal-subtitle').textContent = 'Nota rápida';
+                const colors = ['#007aff', '#ff9500', '#34c759', '#ff2d55', '#af52de'];
+                const colorPicker = colors.map(c => `
+                    <div onclick="selectNoteColor('${c}')" class="w-8 h-8 rounded-full cursor-pointer ring-2 ring-offset-2 ring-transparent hover:scale-110 transition-transform ${data && data.color === c ? 'ring-gray-400' : ''}" style="background-color: ${c}"></div>
+                `).join('');
+                
+                fields.innerHTML = `
+                    <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg" placeholder="Título de la nota">
+                    <textarea name="content" class="${inputClass} h-40 resize-none" placeholder="Escribe aquí...">${data?data.content:''}</textarea>
+                    <div class="flex gap-3 pt-2 justify-center">${colorPicker}</div>
+                    <input type="hidden" name="color" id="note-color-input" value="${data?data.color:'#007aff'}">
+                `;
+            } else if(type === 'schedule') {
+                document.getElementById('modal-subtitle').textContent = 'Evento';
+                const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
+                const days = DAYS_FULL.map(d=>`<option value="${d}" ${(data&&data.day===d)||(!data&&DAYS_FULL[getNowInTimezone().getDay()]===d)?'selected':''}>${d}</option>`).join('');
                 fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1 opacity-60">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div><div class="grid grid-cols-2 gap-4"><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Día</label><select name="day" class="${inputClass}">${days}</select></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="${inputClass}"></div></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>`;
             } else {
+                document.getElementById('modal-subtitle').textContent = 'Tarea';
+                const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
                 fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1 opacity-60">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}"></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>`;
             }
             modal.classList.remove('hidden'); setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.add('md:scale-100', 'translate-y-0'); content.classList.remove('translate-y-full', 'opacity-0', 'md:scale-95'); }, 10);
+        }
+
+        window.selectNoteColor = function(c) {
+            document.getElementById('note-color-input').value = c;
+            // Visual feedback could be added here
         }
 
         function closeModal() {
@@ -735,7 +564,10 @@
 
         function handleFormSubmit(e) {
             e.preventDefault(); const fd = new FormData(e.target); const { type, mode, id } = modalConfig;
-            if(type === 'schedule') {
+            if (type === 'note') {
+                const item = { id: id||Date.now().toString(), title: fd.get('title'), content: fd.get('content'), color: fd.get('color'), date: new Date().toISOString() };
+                if(id) { const idx = state.notes.findIndex(x=>x.id===id); state.notes[idx]=item; } else { if(!state.notes) state.notes=[]; state.notes.unshift(item); }
+            } else if(type === 'schedule') {
                 const item = { id: id||Date.now().toString(), title: fd.get('title'), day: fd.get('day'), time: fd.get('time'), categoryId: fd.get('categoryId'), desc: fd.get('desc') };
                 if(id) { const idx = state.schedule.findIndex(x=>x.id===id); state.schedule[idx]=item; } else state.schedule.push(item);
             } else {
@@ -745,70 +577,124 @@
             saveData(); closeModal(); render();
         }
 
-        function deleteItem(type, id) { if(confirm('¿Eliminar elemento?')) { if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); else state.todos=state.todos.filter(i=>i.id!==id); saveData(); renderApp(); } }
+        // --- EXISTING LOGIC PRESERVED ---
+        function deleteItem(type, id) { if(confirm('¿Eliminar?')) { 
+            if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); 
+            else if(type==='note') state.notes=state.notes.filter(i=>i.id!==id);
+            else state.todos=state.todos.filter(i=>i.id!==id); 
+            saveData(); render(); 
+        }}
+        
         function toggleTodo(id) { const t = state.todos.find(i=>i.id===id); if(t) { t.completed = !t.completed; saveData(); render(); } }
         function handleAddCategory(e) { e.preventDefault(); const fd = new FormData(e.target); state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); saveData(); renderCategoriesList(); e.target.reset(); }
         function deleteCategory(id) { if(state.categories.length>1 && confirm('¿Borrar?')) { state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); } }
         function renderCategoriesList() { document.getElementById('categories-list').innerHTML = state.categories.map(c => `<div class="flex justify-between p-2 theme-card rounded-lg items-center"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-${c.color}-500"></div><span class="text-sm font-medium" style="color:var(--text-main)">${c.name}</span></div><button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
+        
+        function renderStats() {
+            const today = DAYS_FULL[getNowInTimezone().getDay()];
+            const pEl = document.getElementById('pending-count'); if(pEl) pEl.textContent = state.todos.filter(t => !t.completed).length;
+            const cEl = document.getElementById('completed-count'); if(cEl) cEl.textContent = state.todos.filter(t => t.completed).length;
+            const tEl = document.getElementById('today-events-count'); if(tEl) tEl.textContent = state.schedule.filter(s => s.day === today).length;
+            const bEl = document.getElementById('total-todos-badge'); if(bEl) bEl.textContent = state.todos.length;
+        }
 
-        // --- NOTIFICACIONES ---
-        function checkNotifications() {
-            const now = getNowInTimezone();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`;
-            const currentDayName = DAYS_FULL[now.getDay()]; 
-            const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime);
-            events.forEach(event => {
-                showToast(`Es hora: ${event.title}`, 'Recordatorio');
-                if (state.settings.browserNotifications && Notification.permission === "granted") {
-                    try { new Notification("MyDay OS", { body: `Evento: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg", tag: `evt-${event.id}`, requireInteraction: true }); } catch (e) {}
+        function renderDays() {
+            const now = getNowInTimezone(); const currentDayNum = now.getDay(); const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff)); const todayString = now.toDateString();
+            let html = '';
+            for(let i=0; i<7; i++) {
+                let d = new Date(monday); d.setDate(monday.getDate() + i);
+                const isSel = i === state.currentDayIndex; const isToday = d.toDateString() === todayString; 
+                const dayNameShort = DAYS_FULL[d.getDay() === 0 ? 0 : d.getDay()].substring(0,3);
+                const selStyle = isSel ? `color: var(--accent-color);` : `color: var(--text-muted);`;
+                const todayDot = isToday ? `<span class="w-1 h-1 rounded-full mt-1 bg-accent"></span>` : '';
+                const activeClass = isSel ? 'bg-white dark:bg-gray-700 shadow-md scale-105' : 'bg-transparent';
+                html += `<button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${activeClass}" style="${selStyle}"><span class="text-[10px] font-bold uppercase">${dayNameShort}</span><span class="text-lg font-bold">${d.getDate()}</span>${todayDot}</button>`;
+            }
+            document.getElementById('day-selector').innerHTML = html;
+        }
+        function setDay(i) { state.currentDayIndex = i; render(); }
+        function goToToday() { const now = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; setDay(dayIndex); }
+
+        function renderSchedule() {
+            const list = document.getElementById('schedule-list'); const now = new Date(); const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); const monday = new Date(now.setDate(diff)); const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex); const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
+            const items = state.schedule.filter(s => s.day === dayName).sort((a,b)=>a.time.localeCompare(b.time));
+            if(items.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-64 opacity-40"><i data-lucide="coffee" class="w-12 h-12 mb-2"></i><p class="text-sm">Nada para el ${dayName}</p></div>`; return; }
+            list.innerHTML = items.map(item => {
+                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
+                const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
+                return `<div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-200 dark:border-gray-700 pr-2 pt-1"><span class="font-bold text-sm" style="color: var(--text-main);">${item.time}</span></div><div class="flex-1 min-w-0 pr-8"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">${cat.name}</span></div><h3 class="font-bold truncate text-lg" style="color: var(--text-main);">${item.title}</h3>${item.desc ? `<p class="text-sm truncate" style="color: var(--text-muted);">${item.desc}</p>` : ''}</div><button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 opacity-40 hover:opacity-100 hover:text-red-500 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+            }).join('');
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todo-list'); const items = state.todos.sort((a,b) => a.completed - b.completed);
+            if(items.length === 0) { list.innerHTML = '<div class="p-8 text-center text-sm opacity-50">Sin tareas pendientes</div>'; return; }
+            list.innerHTML = items.map(item => {
+                const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
+                const bgClass = COLORS[cat.color] || 'bg-gray-100 text-gray-500';
+                return `<div class="flex items-center gap-3 p-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
+            }).join('');
+        }
+
+        function updateClock() {
+            const now = new Date(); const timeOptions = { hour: '2-digit', minute: '2-digit' }; const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            if (state.settings.timezone !== 'system') { timeOptions.timeZone = state.settings.timezone; dateOptions.timeZone = state.settings.timezone; }
+            const timeStr = now.toLocaleTimeString('es-ES', timeOptions); const dateFull = now.toLocaleDateString('es-ES', dateOptions);
+            const timeEl = document.getElementById('live-clock'); if(timeEl) timeEl.textContent = timeStr;
+        }
+
+        function saveTimezone() { const select = document.getElementById('timezone-select'); state.settings.timezone = select.value; saveData(); updateClock(); renderDays(); renderSchedule(); showToast(`Hora cambiada`, 'Sistema'); }
+        function toggleTheme() { state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light'; saveData(); applyTheme(); }
+        function applyTheme() {
+            const html = document.documentElement; const icon = document.getElementById('theme-icon');
+            if (state.settings.theme === 'dark') { html.setAttribute('data-theme', 'dark'); html.classList.add('dark'); if(icon) { icon.setAttribute('data-lucide', 'sun'); icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>'; } } 
+            else { html.removeAttribute('data-theme'); html.classList.remove('dark'); if(icon) { icon.setAttribute('data-lucide', 'moon'); icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>'; } }
+        }
+        function setAccentColor(color) { state.settings.accentColor = color; saveData(); applySettings(); render(); }
+        function setupAuthListener() {
+            if(!isCloudAvailable) return;
+            auth.onAuthStateChanged(user => {
+                currentUser = user;
+                if(user) {
+                    document.getElementById('auth-ui').classList.add('hidden'); document.getElementById('user-ui').classList.remove('hidden'); document.getElementById('user-avatar').classList.remove('hidden'); document.getElementById('user-photo').src = user.photoURL; document.getElementById('user-img-settings').src = user.photoURL; document.getElementById('user-name-settings').innerText = user.displayName;
+                    const status = document.getElementById('sync-status-indicator'); if(status) { status.className = 'sync-badge sync-active hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Nube'; }
+                    activateFirestoreSync(user.uid);
+                } else {
+                    document.getElementById('auth-ui').classList.remove('hidden'); document.getElementById('user-ui').classList.add('hidden'); document.getElementById('user-avatar').classList.add('hidden');
+                    const status = document.getElementById('sync-status-indicator'); if(status) { status.className = 'sync-badge sync-offline hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local'; }
+                    if(unsubscribeSnapshot) unsubscribeSnapshot();
                 }
             });
         }
-
-        function toggleBrowserNotifications() {
-            const checkbox = document.getElementById('browser-notify-toggle');
-            if (checkbox.checked) {
-                if (!("Notification" in window)) return alert("No soportado");
-                Notification.requestPermission().then(p => {
-                    if (p === "granted") { state.settings.browserNotifications = true; saveData(); new Notification("MyDay OS", { body: "Activado" }); }
-                    else { checkbox.checked = false; state.settings.browserNotifications = false; saveData(); alert("Permiso denegado"); }
-                });
-            } else { state.settings.browserNotifications = false; saveData(); }
+        function activateFirestoreSync(uid) {
+            if(unsubscribeSnapshot) unsubscribeSnapshot();
+            const docRef = db.collection('artifacts').doc(appId).collection('users').doc(uid).collection('data').doc('main');
+            let firstLoad = true;
+            unsubscribeSnapshot = docRef.onSnapshot((doc) => {
+                if(doc.exists && !isSaving) {
+                    const remoteData = doc.data();
+                    state.schedule = remoteData.schedule || []; state.todos = remoteData.todos || []; state.categories = remoteData.categories || state.categories; 
+                    state.notes = remoteData.notes || []; // Sync Notes
+                    if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
+                    render();
+                    if(!firstLoad) showToast('Datos actualizados', 'Nube');
+                } else if(!doc.exists && (state.schedule.length > 0 || state.todos.length > 0 || state.notes.length > 0)) { saveDataToCloud(); }
+                firstLoad = false;
+            });
         }
-
-        function showToast(msg, title) {
-            const c = document.getElementById('toast-container'); const t = document.createElement('div');
-            t.className = 'toast-notification p-4 flex gap-3 items-start cursor-pointer';
-            t.onclick = () => t.remove();
-            
-            t.innerHTML = `<div class="bg-accent/20 p-2 rounded-full text-accent shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold">${title}</h4><p class="text-xs opacity-80">${msg}</p></div>`;
-            c.appendChild(t); lucide.createIcons(); setTimeout(() => { t.style.animation = 'slideInRight 0.4s reverse forwards'; setTimeout(()=>t.remove(), 400); }, 5000);
-        }
-
-        function applySettings() {
-            if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`; else document.body.style.backgroundImage = 'none';
-            const t = document.getElementById('browser-notify-toggle'); if(t) t.checked = state.settings.browserNotifications;
-            const tzSelect = document.getElementById('timezone-select');
-            if(tzSelect) tzSelect.value = state.settings.timezone || 'system';
-            
-            // Apply accent color
-            const accent = state.settings.accentColor || '#007aff';
-            document.documentElement.style.setProperty('--accent-color', accent);
-        }
-        
-        function setPresetBg(type) { 
-            if(type==='white') state.settings.bgUrl = '';
-            else {
-                const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600', abstract: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600'};
-                state.settings.bgUrl = urls[type];
-            }
-            saveData(); applySettings(); 
-        }
-
+        function loginWithGoogle() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p); }
+        function logout() { auth.signOut(); }
+        async function saveData() { localStorage.setItem('myDayOS_v3', JSON.stringify(state)); renderStats(); if(isCloudAvailable && currentUser) saveDataToCloud(); }
+        let saveTimeout; function saveDataToCloud() { if (!isCloudAvailable || !currentUser) return; clearTimeout(saveTimeout); isSaving = true; saveTimeout = setTimeout(async () => { try { const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main'); await docRef.set({ schedule: state.schedule, todos: state.todos, notes: state.notes, categories: state.categories, settings: state.settings, lastUpdated: new Date() }); } catch(e) { console.error(e); } isSaving = false; }, 1000); }
+        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const bgInput = document.getElementById('bg-url-input'); if(bgInput) bgInput.value = state.settings.bgUrl || ''; switchSettingsTab('general'); renderCategoriesList(); }
+        function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+        function switchSettingsTab(tabId) { document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden')); document.getElementById('tab-' + tabId).classList.remove('hidden'); document.querySelectorAll('.settings-tab-btn').forEach(btn => { if(btn.dataset.tab === tabId) { btn.classList.add('settings-tab-active'); btn.style.color = 'var(--accent-color)'; } else { btn.classList.remove('settings-tab-active'); btn.style.color = 'var(--text-main)'; } }); }
+        function checkNotifications() { const now = getNowInTimezone(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const currentTime = `${hours}:${minutes}`; const currentDayName = DAYS_FULL[now.getDay()]; const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime); events.forEach(event => { showToast(`Es hora: ${event.title}`, 'Recordatorio'); if (state.settings.browserNotifications && Notification.permission === "granted") { try { new Notification("MyDay OS", { body: `Evento: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg", tag: `evt-${event.id}`, requireInteraction: true }); } catch (e) {} } }); }
+        function toggleBrowserNotifications() { const checkbox = document.getElementById('browser-notify-toggle'); if (checkbox.checked) { if (!("Notification" in window)) return alert("No soportado"); Notification.requestPermission().then(p => { if (p === "granted") { state.settings.browserNotifications = true; saveData(); new Notification("MyDay OS", { body: "Activado" }); } else { checkbox.checked = false; state.settings.browserNotifications = false; saveData(); alert("Permiso denegado"); } }); } else { state.settings.browserNotifications = false; saveData(); } }
+        function showToast(msg, title) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-notification p-4 flex gap-3 items-start cursor-pointer'; t.onclick = () => t.remove(); t.innerHTML = `<div class="bg-accent/20 p-2 rounded-full text-accent shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold">${title}</h4><p class="text-xs opacity-80">${msg}</p></div>`; c.appendChild(t); lucide.createIcons(); setTimeout(() => { t.style.animation = 'slideInRight 0.4s reverse forwards'; setTimeout(()=>t.remove(), 400); }, 5000); }
+        function applySettings() { if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`; else document.body.style.backgroundImage = 'none'; const t = document.getElementById('browser-notify-toggle'); if(t) t.checked = state.settings.browserNotifications; const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const accent = state.settings.accentColor || '#007aff'; document.documentElement.style.setProperty('--accent-color', accent); }
+        function setPresetBg(type) { if(type==='white') state.settings.bgUrl = ''; else { const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600', abstract: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600'}; state.settings.bgUrl = urls[type]; } saveData(); applySettings(); }
         function saveBackground() { const url = document.getElementById('bg-url-input').value; if(url) { state.settings.bgUrl = url; saveData(); applySettings(); showToast("Fondo actualizado", "Personalización"); } }
-        
         function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state)); a.download = "myday_backup.json"; a.click(); }
         function importData(input) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = e => { try { state = {...state, ...JSON.parse(e.target.result)}; saveData(); render(); closeSettings(); } catch(e){alert('Error JSON');} }; r.readAsText(f); }
         function resetAllData() { if(confirm("¿Seguro?")) { localStorage.removeItem('myDayOS_v3'); location.reload(); } }
