@@ -133,7 +133,7 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* Sync Indicator Animation */
+        /* Animation for Status Dot */
         @keyframes blink-green-gray {
             0%, 100% { background-color: #22c55e; box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); }
             50% { background-color: #9ca3af; box-shadow: none; }
@@ -169,7 +169,7 @@
         <!-- Header -->
         <header class="h-14 flex items-center justify-between px-4 lg:px-5 border-b shrink-0 select-none z-20 transition-colors relative" style="border-bottom-color: var(--glass-border);">
             
-            <!-- Left: Traffic Lights & Title (Visible en móvil también) -->
+            <!-- Left: Traffic Lights & Title -->
             <div class="flex items-center gap-3 z-20">
                 <div class="flex gap-1.5">
                     <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E]/50 cursor-pointer shadow-sm"></div>
@@ -177,13 +177,20 @@
                     <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
                 </div>
                 
-                <div class="flex items-center gap-2 text-sm font-semibold tracking-tight opacity-80" style="color: var(--text-main);">
+                <!-- Desktop Title -->
+                <div class="hidden md:flex items-center gap-2 text-sm font-semibold tracking-tight opacity-80" style="color: var(--text-main);">
                     <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
                     <span>MyDay OS</span>
                 </div>
+
+                <!-- Mobile Title -->
+                <div class="md:hidden text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
+                    <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
+                    <span id="header-title">MyDay</span>
+                </div>
             </div>
             
-            <!-- Center: Desktop Nav Buttons (Segmented Control) -->
+            <!-- Center: Desktop Nav Buttons -->
             <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-1 bg-black/5 dark:bg-white/10 p-1 rounded-lg backdrop-blur-sm z-10 border border-white/5 shadow-inner">
                 <button onclick="switchView('productivity')" id="desk-nav-prod" class="px-5 py-1.5 rounded-md text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-accent">Día</button>
                 <button onclick="switchView('notes')" id="desk-nav-notes" class="px-5 py-1.5 rounded-md text-xs font-medium transition-all text-muted hover:bg-white/40 dark:hover:bg-white/20" style="color: var(--text-muted);">Notas</button>
@@ -191,8 +198,8 @@
             
             <!-- Right: Actions -->
             <div class="flex items-center gap-2 sm:gap-4 z-20">
-                <!-- Indicador de Sincronización (Visible siempre ahora) -->
-                <div id="sync-status-indicator" class="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold border transition-all duration-300 shadow-sm" title="Estado de Nube">
+                <!-- Indicador de Sincronización -->
+                <div id="sync-status-indicator" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300" title="Estado de Nube">
                     <!-- Contenido inyectado por JS -->
                 </div>
 
@@ -214,7 +221,7 @@
         <!-- APP BODY WRAPPER -->
         <div class="flex flex-1 overflow-hidden relative">
             
-            <!-- VISTA: PRODUCTIVIDAD (Agenda + Tareas) -->
+            <!-- VISTA: PRODUCTIVIDAD -->
             <div id="app-productivity" class="flex flex-1 w-full h-full transition-opacity duration-300">
                 <!-- Agenda -->
                 <section id="view-agenda" class="w-full md:w-[35%] glass-sidebar flex flex-col md:min-w-[320px] md:max-w-md relative z-10 transition-all mobile-flex">
@@ -232,10 +239,13 @@
                             </div>
                         </div>
 
-                        <!-- Month Label & Add Button -->
+                        <!-- Month Label & Picker Button -->
                         <div class="flex justify-between items-end mb-2 px-1">
-                             <span id="current-month-label" class="text-xs font-bold uppercase tracking-widest opacity-50" style="color: var(--text-main);">Cargando...</span>
-                             <button onclick="openModal('schedule')" class="w-7 h-7 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:shadow text-accent flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-black/5 dark:border-white/10">
+                             <div class="relative group cursor-pointer" onclick="openModal('jumpDate')">
+                                 <span id="current-month-label" class="text-xs font-bold uppercase tracking-widest opacity-50 group-hover:opacity-100 transition-opacity" style="color: var(--text-main);">Cargando...</span>
+                                 <i data-lucide="calendar-search" class="w-3 h-3 inline ml-1 opacity-40 group-hover:opacity-100 transition-opacity" style="color: var(--text-main);"></i>
+                             </div>
+                             <button type="button" onclick="openModal('schedule')" class="w-7 h-7 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:shadow text-accent flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-black/5 dark:border-white/10">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -277,7 +287,7 @@
                 </section>
             </div>
 
-            <!-- VISTA: NOTAS (Oculta por defecto) -->
+            <!-- VISTA: NOTAS -->
             <div id="app-notes" class="hidden flex-1 w-full h-full p-4 md:p-8 overflow-y-auto pb-24 md:pb-8 animate-fadeIn">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold" style="color: var(--text-main);">Mis Notas</h2>
@@ -292,7 +302,7 @@
 
         </div>
 
-        <!-- BARRA DE NAVEGACIÓN MÓVIL (3 Íconos) -->
+        <!-- BARRA DE NAVEGACIÓN MÓVIL -->
         <nav class="md:hidden absolute bottom-0 left-0 right-0 h-20 mobile-nav flex justify-around items-center z-50 pb-safe backdrop-blur-xl px-2">
             <button onclick="switchView('agenda')" class="flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all nav-btn nav-btn-active" id="btn-nav-agenda" style="color: var(--text-muted);">
                 <i data-lucide="calendar-days" class="w-6 h-6 mb-1"></i>
@@ -361,8 +371,6 @@
                     <!-- Pestaña General -->
                     <div id="tab-general" class="settings-content block">
                         <h2 class="text-xl font-bold mb-4">Personalización</h2>
-                        
-                        <!-- URL Input -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Imagen Personalizada</label>
                             <div class="flex gap-2">
@@ -370,8 +378,6 @@
                                 <button onclick="saveBackground()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm">Aplicar</button>
                             </div>
                         </div>
-
-                        <!-- Zona Horaria -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Zona Horaria</label>
                             <select id="timezone-select" onchange="saveTimezone()" class="theme-input w-full rounded-xl px-4 py-2 text-sm outline-none">
@@ -387,16 +393,12 @@
                                 <option value="America/Lima">🇵🇪 Lima (PET)</option>
                             </select>
                         </div>
-
-                        <!-- Color de Acento -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Color de Acento</label>
                             <div class="flex gap-3 flex-wrap" id="accent-colors-container">
                                 <!-- Populated by JS -->
                             </div>
                         </div>
-
-                        <!-- Presets -->
                         <div>
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Fondos Predeterminados</label>
                             <div class="flex gap-3 flex-wrap" id="background-presets-container">
@@ -483,38 +485,31 @@
         const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Expanded Color Palette (Name -> Tailwind Class Base)
         const COLORS = { 
             blue:'bg-blue-100 text-blue-700', red:'bg-red-100 text-red-700', green:'bg-green-100 text-green-700', purple:'bg-purple-100 text-purple-700', orange:'bg-orange-100 text-orange-700',
             pink: 'bg-pink-100 text-pink-700', teal: 'bg-teal-100 text-teal-700', indigo: 'bg-indigo-100 text-indigo-700', cyan: 'bg-cyan-100 text-cyan-700', lime: 'bg-lime-100 text-lime-700',
             rose: 'bg-rose-100 text-rose-700', amber: 'bg-amber-100 text-amber-700', sky: 'bg-sky-100 text-sky-700', emerald: 'bg-emerald-100 text-emerald-700', violet: 'bg-violet-100 text-violet-700', gray: 'bg-gray-100 text-gray-700'
         };
-
         const COLOR_DOTS = {
             blue: '#3b82f6', red: '#ef4444', green: '#22c55e', purple: '#a855f7', orange: '#f97316',
             pink: '#ec4899', teal: '#14b8a6', indigo: '#6366f1', cyan: '#06b6d4', lime: '#84cc16',
             rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', emerald: '#10b981', violet: '#8b5cf6',
             gray: '#6b7280'
         };
-        
         const ACCENT_OPTIONS = [
-             { color: '#007aff', name: 'Blue' }, { color: '#af52de', name: 'Purple' },
-             { color: '#ff2d55', name: 'Pink' }, { color: '#ff9500', name: 'Orange' },
-             { color: '#34c759', name: 'Green' }, { color: '#ff3b30', name: 'Red' }
+             { color: '#007aff', name: 'Blue' }, { color: '#af52de', name: 'Purple' }, { color: '#ff2d55', name: 'Pink' }, { color: '#ff9500', name: 'Orange' }, { color: '#34c759', name: 'Green' }, { color: '#ff3b30', name: 'Red' }
         ];
-
         const BACKGROUND_PRESETS = [
             { type: 'nature', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600' },
             { type: 'dark', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600' },
             { type: 'abstract', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600' },
-            { type: 'white', url: '' } // Empty string for default
+            { type: 'white', url: '' }
         ];
 
         // INIT
         try { firebase.initializeApp(USER_FIREBASE_CONFIG); auth = firebase.auth(); db = firebase.firestore(); appId = USER_FIREBASE_CONFIG.projectId; isCloudAvailable = true; } catch(e) { console.log("Offline"); }
 
         function init() {
-            // PWA Manifest Injection
             const manifest = {
                 name: "MyDay OS", short_name: "MyDay", start_url: ".", display: "standalone",
                 background_color: "#f2f2f7", theme_color: "#f2f2f7",
@@ -527,10 +522,8 @@
             if(local) state = {...state, ...JSON.parse(local)};
             
             viewDate = getNowInTimezone();
-            
             applyTheme();
             applySettings();
-            
             render();
             setupAuthListener();
             setInterval(updateClock, 1000);
@@ -538,9 +531,7 @@
             updateClock();
         }
 
-        // --- RENDER SETTINGS UI DYNAMICALLY ---
         function renderSettingsGeneral() {
-            // Render Accents
             const accentContainer = document.getElementById('accent-colors-container');
             if (accentContainer) {
                 accentContainer.innerHTML = ACCENT_OPTIONS.map(opt => {
@@ -549,29 +540,20 @@
                     return `<button onclick="setAccentColor('${opt.color}')" class="w-8 h-8 rounded-full transition-all ${ringClass}" style="background-color: ${opt.color}" title="${opt.name}"></button>`;
                 }).join('');
             }
-
-            // Render Backgrounds
             const bgContainer = document.getElementById('background-presets-container');
             if (bgContainer) {
                 bgContainer.innerHTML = BACKGROUND_PRESETS.map(bg => {
                     const isSelected = state.settings.bgUrl === bg.url;
-                    // For white preset, we check if url is empty
                     const ringClass = isSelected ? 'ring-4 ring-offset-2 ring-blue-500' : 'ring-2 ring-transparent hover:ring-blue-300';
                     const content = bg.type === 'white' ? '<i data-lucide="ban" class="w-5 h-5 text-gray-400"></i>' : '';
                     const style = bg.type !== 'white' ? `background-image: url('${bg.url}')` : 'background-color: white';
                     const checkIcon = isSelected ? '<div class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full"><i data-lucide="check" class="w-6 h-6 text-white"></i></div>' : '';
-                    
-                    return `<button onclick="setPresetBg('${bg.type}')" class="relative w-12 h-12 rounded-full bg-cover transition-all ${ringClass}" style="${style}" title="${bg.type}">
-                        ${content}
-                        ${checkIcon}
-                    </button>`;
+                    return `<button onclick="setPresetBg('${bg.type}')" class="relative w-12 h-12 rounded-full bg-cover transition-all ${ringClass}" style="${style}" title="${bg.type}">${content}${checkIcon}</button>`;
                 }).join('');
                 lucide.createIcons();
             }
         }
 
-
-        // --- CORE FUNCTIONS ---
         function getNowInTimezone() {
             const now = new Date();
             if (state.settings.timezone === 'system') return now;
@@ -585,26 +567,19 @@
             const btnProd = document.getElementById('desk-nav-prod');
             const btnNotes = document.getElementById('desk-nav-notes');
             
-            // Desktop Nav
             if(view === 'notes') {
-                prod.classList.add('hidden');
-                notes.classList.remove('hidden');
+                prod.classList.add('hidden'); notes.classList.remove('hidden');
                 btnNotes.classList.remove('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20'); 
                 btnNotes.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
-                
                 btnProd.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
                 btnProd.classList.add('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20', 'font-medium');
             } else {
-                notes.classList.add('hidden');
-                prod.classList.remove('hidden');
-                
+                notes.classList.add('hidden'); prod.classList.remove('hidden');
                 btnProd.classList.remove('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20');
                 btnProd.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
-                
                 btnNotes.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
                 btnNotes.classList.add('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20', 'font-medium');
                 
-                // Handle sub-views for mobile
                 if(view === 'agenda' || view === 'tasks') {
                     const agenda = document.getElementById('view-agenda');
                     const tasks = document.getElementById('view-tasks');
@@ -617,8 +592,6 @@
                     }
                 }
             }
-
-            // Mobile Nav Active State
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('nav-btn-active');
                 btn.style.color = 'var(--text-muted)';
@@ -638,52 +611,46 @@
             const el = document.getElementById('sync-status-indicator');
             if (!el) return;
             
-            // This function is intended to update the status content, not hide/show it based on viewport directly
-            // The HTML class 'hidden sm:flex' controls initial visibility on mobile. 
-            // If we want it visible on mobile now, we should ensure 'flex' is applied and 'hidden' removed.
-            
-            el.className = 'sync-badge flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
+            el.classList.remove('hidden', 'sm:flex'); el.classList.add('flex'); 
+            el.className = 'sync-badge hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
             
             let dotClass = '', text = '', containerClass = '';
-
             if (status === 'syncing') {
                 containerClass = 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
-                dotClass = 'bg-yellow-500 animate-pulse'; 
-                text = 'Guardando...';
+                dotClass = 'bg-yellow-500 animate-pulse'; text = 'Guardando...';
             } else if (status === 'online') {
                 containerClass = 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
-                dotClass = 'dot-blink-green'; 
-                text = 'Online';
+                dotClass = 'dot-blink-green'; text = 'Online';
             } else if (status === 'local') {
                 containerClass = 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
-                dotClass = 'bg-gray-400';
-                text = 'Local';
+                dotClass = 'bg-gray-400'; text = 'Local';
             } else {
                 containerClass = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
-                dotClass = 'bg-red-500';
-                text = 'Error';
+                dotClass = 'bg-red-500'; text = 'Error';
             }
-
             el.classList.add(...containerClass.split(' '));
             el.innerHTML = `<div class="w-2 h-2 rounded-full ${dotClass}"></div>${text}`;
         }
 
-        // --- NAVIGATION LOGIC ---
-        function changeWeek(offset) {
-            // Move viewDate by 7 days
-            viewDate.setDate(viewDate.getDate() + (offset * 7));
-            render();
-        }
+        function changeWeek(offset) { viewDate.setDate(viewDate.getDate() + (offset * 7)); render(); }
         
         function goToToday() {
             viewDate = getNowInTimezone();
-            // Reset selection to correct day of week for "today"
             const dayIndex = viewDate.getDay() === 0 ? 6 : viewDate.getDay() - 1;
             state.currentDayIndex = dayIndex;
             render();
         }
 
-        // --- NOTES LOGIC ---
+        function jumpToDate(dateString) {
+            if (!dateString) return;
+            const newDate = new Date(dateString + 'T00:00:00');
+            viewDate = newDate;
+            const dayOfWeek = newDate.getDay();
+            state.currentDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+            render();
+            // Close picker logic handled by modal close in renderView/custom implementation if needed, but native picker closes itself.
+        }
+
         function renderNotes() {
             const grid = document.getElementById('notes-grid');
             if(!state.notes || state.notes.length === 0) {
@@ -700,11 +667,10 @@
             `).join('');
         }
 
-        // --- MODALS & FORMS ---
         let modalConfig = {};
         function openModal(type, id = null) {
             modalConfig = {type, id};
-            const modal = document.getElementById('modal'), content = document.getElementById('modal-content'), backdrop = document.getElementById('modal-backdrop'), fields = document.getElementById('form-fields');
+            const modal = document.getElementById('modal'), content = document.getElementById('modal-content'), backdrop = document.getElementById('modal-backdrop');
             let data = null;
             if(id) {
                 if(type === 'schedule') data = state.schedule.find(x => x.id === id);
@@ -712,8 +678,25 @@
                 else if(type === 'note') data = state.notes.find(x => x.id === id);
             }
             
-            // Branch logic: View Mode (Read Only) or Edit/Create Mode
-            if (id && (type === 'note' || type === 'schedule')) {
+            if (type === 'jumpDate') {
+                // Special case for date jumper modal
+                document.getElementById('modal-title').innerText = 'Ir a fecha';
+                document.getElementById('modal-subtitle').innerText = 'Selecciona una fecha';
+                const currentVal = viewDate.toISOString().split('T')[0];
+                const inputClass = "w-full px-4 py-3 rounded-xl theme-input border outline-none transition-colors";
+                
+                document.getElementById('form-fields').innerHTML = `
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <label class="block text-xs font-bold uppercase mb-2 opacity-60">Seleccionar Fecha</label>
+                        <input type="date" name="targetDate" value="${currentVal}" class="${inputClass} text-lg font-bold" required>
+                    </div>
+                `;
+                
+                document.getElementById('modal-footer').innerHTML = `
+                    <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cancelar</button>
+                    <button type="submit" class="px-6 py-3 md:py-2.5 rounded-xl btn-primary font-medium shadow-lg shadow-blue-500/20 transition transform active:scale-95 text-sm flex items-center justify-center gap-2 flex-1 md:flex-none"><i data-lucide="calendar" class="w-4 h-4"></i> Ir a fecha</button>
+                `;
+            } else if (id && (type === 'note' || type === 'schedule')) {
                  renderViewMode(type, data);
             } else {
                  renderEditMode(type, data);
@@ -747,7 +730,7 @@
                 `;
             } else if (type === 'schedule') {
                 const dateDisplay = data.specificDate ? 
-                    new Date(data.specificDate + 'T00:00').toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'long'}) : 
+                    new Date(data.specificDate + 'T00:00').toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'}) : 
                     `Todos los ${data.day}`;
                     
                 contentHtml = `
@@ -908,6 +891,16 @@
 
         function handleFormSubmit(e) {
             e.preventDefault(); const fd = new FormData(e.target); const { type, mode, id } = modalConfig;
+            
+            if (type === 'jumpDate') {
+                const targetDate = fd.get('targetDate');
+                if (targetDate) {
+                    jumpToDate(targetDate);
+                }
+                closeModal();
+                return;
+            }
+
             if (type === 'note') {
                 const item = { id: id||Date.now().toString(), title: fd.get('title'), content: fd.get('content'), color: fd.get('color'), date: new Date().toISOString() };
                 if(id) { const idx = state.notes.findIndex(x=>x.id===id); state.notes[idx]=item; } else { if(!state.notes) state.notes=[]; state.notes.unshift(item); }
@@ -996,23 +989,57 @@
         }
 
         function renderDays() {
-            const now = getNowInTimezone(); const currentDayNum = now.getDay(); const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff)); const todayString = now.toDateString();
+            // Fecha real de HOY (para marcar el puntito de "hoy" si coincide)
+            const realNow = getNowInTimezone();
+            const todayString = realNow.toDateString();
+
+            // Calcular el Lunes de la semana que se está VISUALIZANDO (viewDate)
+            const currentViewDayNum = viewDate.getDay(); 
+            const diff = viewDate.getDate() - currentViewDayNum + (currentViewDayNum === 0 ? -6 : 1); 
+            const monday = new Date(viewDate); 
+            monday.setDate(diff);
+            
+            // Actualizar etiqueta del mes (Usamos el jueves de la semana para determinar el mes predominante)
+            const monthRefDate = new Date(monday);
+            monthRefDate.setDate(monthRefDate.getDate() + 3);
+
             const monthLabel = document.getElementById('current-month-label');
-            if (monthLabel) { const monthName = MONTHS[viewDate.getMonth()]; const year = viewDate.getFullYear(); monthLabel.textContent = `${monthName} ${year}`; }
+            if (monthLabel) { 
+                const monthName = MONTHS[monthRefDate.getMonth()]; 
+                const year = monthRefDate.getFullYear(); 
+                monthLabel.textContent = `${monthName} ${year}`; 
+            }
+
             let html = '';
             for(let i=0; i<7; i++) {
-                let d = new Date(monday); d.setDate(monday.getDate() + i);
-                const isSel = i === state.currentDayIndex; const isToday = d.toDateString() === todayString; 
+                let d = new Date(monday); 
+                d.setDate(monday.getDate() + i);
+                
+                const isSel = i === state.currentDayIndex; 
+                const isToday = d.toDateString() === todayString; 
+                
                 const dayNameShort = DAYS_FULL[d.getDay() === 0 ? 0 : d.getDay()].substring(0,3);
                 const selStyle = isSel ? `color: var(--accent-color);` : `color: var(--text-muted);`;
                 const todayDot = isToday ? `<span class="w-1 h-1 rounded-full mt-1 bg-accent"></span>` : '';
                 const activeClass = isSel ? 'bg-white dark:bg-gray-700 shadow-md scale-105' : 'bg-transparent';
+                
                 html += `<button onclick="setDay(${i})" class="flex flex-col items-center justify-center min-w-[3.5rem] h-14 rounded-xl transition-all ${activeClass}" style="${selStyle}"><span class="text-[10px] font-bold uppercase">${dayNameShort}</span><span class="text-lg font-bold">${d.getDate()}</span>${todayDot}</button>`;
             }
             document.getElementById('day-selector').innerHTML = html;
         }
+
         function setDay(i) { state.currentDayIndex = i; render(); }
-        function goToToday() { viewDate = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; state.currentDayIndex = dayIndex; render(); }
+        
+        function goToToday() { 
+            viewDate = getNowInTimezone(); 
+            const dayIndex = viewDate.getDay() === 0 ? 6 : viewDate.getDay() - 1;
+            state.currentDayIndex = dayIndex;
+            render(); 
+        }
+        function changeWeek(offset) {
+            viewDate.setDate(viewDate.getDate() + (offset * 7));
+            render();
+        }
 
         function renderSchedule() {
             const list = document.getElementById('schedule-list'); const now = new Date(); const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); const monday = new Date(now.setDate(diff)); const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex); const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
