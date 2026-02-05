@@ -125,11 +125,6 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        .sync-badge { font-size: 10px; padding: 2px 6px; border-radius: 99px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
-        .sync-active { background-color: rgba(52, 211, 153, 0.2); color: #10b981; }
-        .sync-offline { background-color: rgba(156, 163, 175, 0.2); color: #6b7280; }
-        [data-theme="dark"] .sync-offline { color: #9ca3af; }
-        
         .nav-btn-active { color: var(--accent-color) !important; }
         .settings-tab-active { background-color: var(--card-bg); color: var(--accent-color) !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -188,9 +183,11 @@
             
             <!-- Right: Actions -->
             <div class="flex items-center gap-4 z-20">
-                <div id="sync-status-indicator" class="sync-badge sync-offline hidden sm:flex" title="Estado">
-                    <div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local
+                <!-- Indicador de Sincronización Animado -->
+                <div id="sync-status-indicator" class="flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 opacity-0" title="Estado">
+                    <!-- Icono inyectado por JS -->
                 </div>
+
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
                     <i id="theme-icon" data-lucide="moon" class="w-5 h-5 opacity-80" style="color: var(--text-main);"></i>
                 </button>
@@ -414,30 +411,8 @@
 
                     <div id="tab-categories" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Categorías</h2>
-                        <form onsubmit="handleAddCategory(event)" class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
-                            <div class="mb-3">
-                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Nombre</label>
-                                <input type="text" name="catName" placeholder="Ej. Universidad" class="theme-input w-full px-3 py-2 rounded-lg outline-none text-sm" required>
-                            </div>
-                            
-                            <label class="block text-xs font-bold uppercase mb-2 opacity-60">Color</label>
-                            <div class="grid grid-cols-6 gap-2 mb-3" id="cat-color-picker-container">
-                                <!-- Colors injected here -->
-                            </div>
-                            <input type="hidden" name="catColor" id="new-cat-color" value="blue">
-
-                            <div class="mt-4 border-t pt-4 border-gray-200 dark:border-gray-600">
-                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Personalizado</label>
-                                <div class="flex items-center gap-2">
-                                     <input type="color" id="custom-cat-color" class="w-8 h-8 rounded cursor-pointer border-0 p-0" onchange="document.getElementById('new-cat-color').value = this.value">
-                                     <span class="text-xs opacity-50">Elige un tono exacto</span>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" class="w-full mt-4 py-2 btn-primary text-white rounded-lg font-medium text-sm">Agregar Categoría</button>
-                        </form>
-                        <div class="text-xs font-bold uppercase mb-3 opacity-60">Existentes</div>
-                        <div id="categories-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4"><input type="text" name="catName" placeholder="Nombre" class="theme-input flex-1 px-3 py-2 rounded-lg outline-none text-sm" required><select name="catColor" class="theme-input px-3 py-2 rounded-lg outline-none text-sm"><option value="blue">Azul</option><option value="red">Rojo</option><option value="green">Verde</option><option value="purple">Morado</option><option value="orange">Naranja</option></select><button type="submit" class="p-2 btn-primary text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button></form>
+                        <div id="categories-list" class="space-y-2"></div>
                     </div>
 
                     <div id="tab-data" class="settings-content hidden">
@@ -587,6 +562,57 @@
 
         function render() {
             renderDays(); renderSchedule(); renderTodos(); renderNotes(); renderStats(); applySettings(); lucide.createIcons();
+        }
+
+        function setSyncStatus(status) {
+            const el = document.getElementById('sync-status-indicator');
+            if (!el) return;
+            
+            // Ensure visibility (remove hidden if present from previous logic)
+            el.classList.remove('hidden', 'sm:flex'); 
+            // On mobile we might want just icon, on desktop icon+text. 
+            // The logic below rebuilds content.
+            
+            let icon = '';
+            let text = '';
+            let classes = '';
+
+            if (status === 'syncing') {
+                classes = 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+                icon = 'refresh-cw';
+                text = 'Sincronizando';
+                el.classList.add('opacity-100'); // Make visible
+            } else if (status === 'online') {
+                classes = 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
+                icon = 'cloud';
+                text = 'En línea';
+                // Optional: Fade out online status after a while if desired, or keep it.
+                // Let's keep it visible on desktop, maybe just icon on mobile.
+                el.classList.add('opacity-100');
+            } else if (status === 'local') {
+                classes = 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
+                icon = 'hard-drive';
+                text = 'Local';
+                el.classList.add('opacity-100');
+            } else {
+                classes = 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
+                icon = 'wifi-off';
+                text = 'Error';
+                el.classList.add('opacity-100');
+            }
+
+            el.className = `sync-badge transition-all duration-300 ${classes}`;
+            const animClass = status === 'syncing' ? 'animate-spin' : '';
+            
+            el.innerHTML = `
+                <i data-lucide="${icon}" class="w-3.5 h-3.5 ${animClass}"></i>
+                <span class="hidden sm:inline ml-1">${text}</span>
+            `;
+            
+            lucide.createIcons();
+            
+            // Auto-hide "Online" status on mobile after a few seconds to save space? 
+            // Or just keep it. User requested feedback.
         }
 
         // --- NAVIGATION LOGIC ---
