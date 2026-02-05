@@ -167,27 +167,19 @@
     <main class="w-full max-w-7xl h-[92vh] glass-panel rounded-2xl flex flex-col overflow-hidden relative fade-in">
         
         <!-- Header -->
-        <header class="h-14 flex items-center justify-between px-5 border-b shrink-0 select-none z-20 transition-colors relative" style="border-bottom-color: var(--glass-border);">
+        <header class="h-14 flex items-center justify-between px-4 lg:px-5 border-b shrink-0 select-none z-20 transition-colors relative" style="border-bottom-color: var(--glass-border);">
             
-            <!-- Left: Traffic Lights & Title -->
-            <div class="flex items-center gap-4 z-20">
-                <div class="hidden md:flex gap-2">
+            <!-- Left: Traffic Lights & Title (Visible en móvil también) -->
+            <div class="flex items-center gap-3 z-20">
+                <div class="flex gap-1.5">
                     <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E]/50 cursor-pointer shadow-sm"></div>
                     <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24]/50 cursor-pointer shadow-sm"></div>
                     <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
                 </div>
                 
-                <!-- Desktop Title -->
-                <div class="hidden md:flex items-center gap-2 text-sm font-semibold tracking-tight opacity-80" style="color: var(--text-main);">
+                <div class="flex items-center gap-2 text-sm font-semibold tracking-tight opacity-80" style="color: var(--text-main);">
                     <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
                     <span>MyDay OS</span>
-                </div>
-
-                <!-- Mobile Title with Sync Indicator Integrated -->
-                <div class="md:hidden flex items-center gap-3">
-                    <div class="text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
-                        <span id="header-title">MyDay</span>
-                    </div>
                 </div>
             </div>
             
@@ -198,20 +190,20 @@
             </div>
             
             <!-- Right: Actions -->
-            <div class="flex items-center gap-3 z-20">
-                <!-- Indicador de Sincronización (Siempre visible) -->
-                <div id="sync-status-indicator" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all duration-300 shadow-sm" title="Estado de Nube">
+            <div class="flex items-center gap-2 sm:gap-4 z-20">
+                <!-- Indicador de Sincronización (Visible siempre ahora) -->
+                <div id="sync-status-indicator" class="flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-semibold border transition-all duration-300 shadow-sm" title="Estado de Nube">
                     <!-- Contenido inyectado por JS -->
                 </div>
 
-                <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
-                    <i id="theme-icon" data-lucide="moon" class="w-5 h-5 opacity-80" style="color: var(--text-main);"></i>
+                <button onclick="toggleTheme()" class="p-1.5 sm:p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
+                    <i id="theme-icon" data-lucide="moon" class="w-4 h-4 sm:w-5 sm:h-5 opacity-80" style="color: var(--text-main);"></i>
                 </button>
                 <div id="user-avatar" class="hidden w-6 h-6 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold overflow-hidden border border-white/20 shadow-sm">
                     <img id="user-photo" src="" alt="User" class="w-full h-full object-cover">
                 </div>
                 <button onclick="openSettings()" class="text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors p-1 rounded-md hover:bg-black/5 dark:hover:bg-white/10">
-                    <i data-lucide="settings-2" class="w-5 h-5 opacity-80" style="color: var(--text-main);"></i>
+                    <i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5 opacity-80" style="color: var(--text-main);"></i>
                 </button>
                 <div class="text-right hidden sm:block">
                     <div id="live-clock" class="text-sm font-medium tabular-nums leading-none" style="color: var(--text-main);">--:--</div>
@@ -491,7 +483,7 @@
         const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Expanded Color Palette
+        // Expanded Color Palette (Name -> Tailwind Class Base)
         const COLORS = { 
             blue:'bg-blue-100 text-blue-700', red:'bg-red-100 text-red-700', green:'bg-green-100 text-green-700', purple:'bg-purple-100 text-purple-700', orange:'bg-orange-100 text-orange-700',
             pink: 'bg-pink-100 text-pink-700', teal: 'bg-teal-100 text-teal-700', indigo: 'bg-indigo-100 text-indigo-700', cyan: 'bg-cyan-100 text-cyan-700', lime: 'bg-lime-100 text-lime-700',
@@ -646,11 +638,11 @@
             const el = document.getElementById('sync-status-indicator');
             if (!el) return;
             
-            el.classList.remove('hidden', 'sm:flex'); 
-            el.classList.add('flex'); 
+            // This function is intended to update the status content, not hide/show it based on viewport directly
+            // The HTML class 'hidden sm:flex' controls initial visibility on mobile. 
+            // If we want it visible on mobile now, we should ensure 'flex' is applied and 'hidden' removed.
             
-            // Reset base classes
-            el.className = 'sync-badge hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
+            el.className = 'sync-badge flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
             
             let dotClass = '', text = '', containerClass = '';
 
