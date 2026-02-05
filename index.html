@@ -142,6 +142,13 @@
         @media (min-width: 768px) {
             .notes-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
         }
+        
+        /* Color Swatches Grid */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+            gap: 0.75rem;
+        }
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white transition-colors duration-300" id="app-body">
@@ -407,8 +414,30 @@
 
                     <div id="tab-categories" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Categorías</h2>
-                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4"><input type="text" name="catName" placeholder="Nombre" class="theme-input flex-1 px-3 py-2 rounded-lg outline-none text-sm" required><select name="catColor" class="theme-input px-3 py-2 rounded-lg outline-none text-sm"><option value="blue">Azul</option><option value="red">Rojo</option><option value="green">Verde</option><option value="purple">Morado</option><option value="orange">Naranja</option></select><button type="submit" class="p-2 btn-primary text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button></form>
-                        <div id="categories-list" class="space-y-2"></div>
+                        <form onsubmit="handleAddCategory(event)" class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <div class="mb-3">
+                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Nombre</label>
+                                <input type="text" name="catName" placeholder="Ej. Universidad" class="theme-input w-full px-3 py-2 rounded-lg outline-none text-sm" required>
+                            </div>
+                            
+                            <label class="block text-xs font-bold uppercase mb-2 opacity-60">Color</label>
+                            <div class="grid grid-cols-6 gap-2 mb-3" id="cat-color-picker-container">
+                                <!-- Colors injected here -->
+                            </div>
+                            <input type="hidden" name="catColor" id="new-cat-color" value="blue">
+
+                            <div class="mt-4 border-t pt-4 border-gray-200 dark:border-gray-600">
+                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Personalizado</label>
+                                <div class="flex items-center gap-2">
+                                     <input type="color" id="custom-cat-color" class="w-8 h-8 rounded cursor-pointer border-0 p-0" onchange="document.getElementById('new-cat-color').value = this.value">
+                                     <span class="text-xs opacity-50">Elige un tono exacto</span>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full mt-4 py-2 btn-primary text-white rounded-lg font-medium text-sm">Agregar Categoría</button>
+                        </form>
+                        <div class="text-xs font-bold uppercase mb-3 opacity-60">Existentes</div>
+                        <div id="categories-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
 
                     <div id="tab-data" class="settings-content hidden">
@@ -448,7 +477,34 @@
         let auth, db, appId, currentUser, isCloudAvailable = false, unsubscribeSnapshot = null, isSaving = false;
         const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        const COLORS = { blue:'bg-blue-100 text-blue-700', red:'bg-red-100 text-red-700', green:'bg-green-100 text-green-700', purple:'bg-purple-100 text-purple-700', orange:'bg-orange-100 text-orange-700' };
+        
+        // Expanded Color Palette (Name -> Tailwind Class Base)
+        const COLORS = { 
+            blue:'bg-blue-100 text-blue-700', 
+            red:'bg-red-100 text-red-700', 
+            green:'bg-green-100 text-green-700', 
+            purple:'bg-purple-100 text-purple-700', 
+            orange:'bg-orange-100 text-orange-700',
+            pink: 'bg-pink-100 text-pink-700',
+            teal: 'bg-teal-100 text-teal-700',
+            indigo: 'bg-indigo-100 text-indigo-700',
+            cyan: 'bg-cyan-100 text-cyan-700',
+            lime: 'bg-lime-100 text-lime-700',
+            rose: 'bg-rose-100 text-rose-700',
+            amber: 'bg-amber-100 text-amber-700',
+            sky: 'bg-sky-100 text-sky-700',
+            emerald: 'bg-emerald-100 text-emerald-700',
+            violet: 'bg-violet-100 text-violet-700',
+            gray: 'bg-gray-100 text-gray-700'
+        };
+
+        // For Color Dots in Settings
+        const COLOR_DOTS = {
+            blue: '#3b82f6', red: '#ef4444', green: '#22c55e', purple: '#a855f7', orange: '#f97316',
+            pink: '#ec4899', teal: '#14b8a6', indigo: '#6366f1', cyan: '#06b6d4', lime: '#84cc16',
+            rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', emerald: '#10b981', violet: '#8b5cf6',
+            gray: '#6b7280'
+        };
 
         // INIT
         try { firebase.initializeApp(USER_FIREBASE_CONFIG); auth = firebase.auth(); db = firebase.firestore(); appId = USER_FIREBASE_CONFIG.projectId; isCloudAvailable = true; } catch(e) { console.log("Offline"); }
@@ -668,12 +724,11 @@
                 `;
             } else if(type === 'schedule') {
                 const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
+                const days = DAYS_FULL.map(d=>`<option value="${d}" ${(data&&data.day===d)||(!data&&DAYS_FULL[getNowInTimezone().getDay()]===d)?'selected':''}>${d}</option>`).join('');
                 
-                // Calculate date to pre-fill: either existing data, or selected view date
                 let prefillDate = '';
                 if (data && data.specificDate) prefillDate = data.specificDate;
                 else {
-                    // Calculate date based on viewDate and currentDayIndex
                     const monday = new Date(viewDate);
                     const currentDayNum = monday.getDay();
                     const diff = monday.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1);
@@ -683,10 +738,10 @@
                     prefillDate = selectedDate.toISOString().split('T')[0];
                 }
 
-                const isRecurring = data ? !data.specificDate : true; // Default to recurring for new items? User asked to "Add/review back or forward". Maybe default to specific if adding on a specific date? Let's default to recurring as per existing behavior, but provide toggle. Actually, for a calendar, specific date is often expected. Let's make recurring checked by default for consistency.
+                const isRecurring = data ? !data.specificDate : true;
 
                 fields.innerHTML = `
-                    <div><label class="text-xs font-bold uppercase mb-1 opacity-60">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div>
+                    <div class="mb-5"><label class="text-xs font-bold uppercase mb-1 opacity-60">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div>
                     
                     <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
                         <label class="flex items-center gap-3 cursor-pointer mb-3">
@@ -711,7 +766,7 @@
                         <div><label class="text-xs font-bold uppercase mb-1 opacity-60">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="${inputClass}"></div>
                         <div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>
                     </div>
-                    <div><label class="text-xs font-bold uppercase mb-1 opacity-60">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>
+                    <div class="mt-4"><label class="text-xs font-bold uppercase mb-1 opacity-60">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>
                 `;
             } else {
                 const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
@@ -729,14 +784,8 @@
             const isRecurring = document.getElementById('is-recurring').checked;
             const dateContainer = document.getElementById('date-input-container');
             const dayContainer = document.getElementById('day-select-container');
-            
-            if (isRecurring) {
-                dateContainer.classList.add('hidden');
-                dayContainer.classList.remove('hidden');
-            } else {
-                dateContainer.classList.remove('hidden');
-                dayContainer.classList.add('hidden');
-            }
+            if (isRecurring) { dateContainer.classList.add('hidden'); dayContainer.classList.remove('hidden'); } 
+            else { dateContainer.classList.remove('hidden'); dayContainer.classList.add('hidden'); }
         }
 
         window.selectNoteColor = function(c) {
@@ -756,18 +805,12 @@
                 if(id) { const idx = state.notes.findIndex(x=>x.id===id); state.notes[idx]=item; } else { if(!state.notes) state.notes=[]; state.notes.unshift(item); }
             } else if(type === 'schedule') {
                 const isRecurring = document.getElementById('is-recurring').checked;
-                
                 const item = { 
                     id: id||Date.now().toString(), 
-                    title: fd.get('title'), 
-                    time: fd.get('time'), 
-                    categoryId: fd.get('categoryId'), 
-                    desc: fd.get('desc'),
-                    // Logic for recurring vs specific
-                    day: isRecurring ? fd.get('day') : DAYS_FULL[new Date(fd.get('specificDate')).getDay() === 0 ? 0 : new Date(fd.get('specificDate')).getDay()], // Fallback day name just in case
+                    title: fd.get('title'), time: fd.get('time'), categoryId: fd.get('categoryId'), desc: fd.get('desc'),
+                    day: isRecurring ? fd.get('day') : DAYS_FULL[new Date(fd.get('specificDate')).getDay() === 0 ? 0 : new Date(fd.get('specificDate')).getDay()],
                     specificDate: isRecurring ? null : fd.get('specificDate')
                 };
-                
                 if(id) { const idx = state.schedule.findIndex(x=>x.id===id); state.schedule[idx]=item; } else state.schedule.push(item);
             } else {
                 const item = { id: id||Date.now().toString(), text: fd.get('text'), categoryId: fd.get('categoryId'), completed: id?state.todos.find(x=>x.id===id).completed:false };
@@ -776,19 +819,54 @@
             saveData(); closeModal(); render();
         }
 
-        // --- EXISTING LOGIC PRESERVED ---
         function deleteItem(type, id) { if(confirm('¿Eliminar?')) { 
             if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); 
             else if(type==='note') state.notes=state.notes.filter(i=>i.id!==id);
             else state.todos=state.todos.filter(i=>i.id!==id); 
-            saveData(); render(); 
+            saveData(); render(); closeModal(); // Close modal if open
         }}
         
         function toggleTodo(id) { const t = state.todos.find(i=>i.id===id); if(t) { t.completed = !t.completed; saveData(); render(); } }
-        function handleAddCategory(e) { e.preventDefault(); const fd = new FormData(e.target); state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); saveData(); renderCategoriesList(); e.target.reset(); }
-        function deleteCategory(id) { if(state.categories.length>1 && confirm('¿Borrar?')) { state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); } }
-        function renderCategoriesList() { document.getElementById('categories-list').innerHTML = state.categories.map(c => `<div class="flex justify-between p-2 theme-card rounded-lg items-center"><div class="flex items-center gap-2"><div class="w-3 h-3 rounded-full bg-${c.color}-500"></div><span class="text-sm font-medium" style="color:var(--text-main)">${c.name}</span></div><button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join(''); lucide.createIcons(); }
         
+        // --- CATEGORIES ---
+        function handleAddCategory(e) { 
+            e.preventDefault(); const fd = new FormData(e.target); 
+            state.categories.push({id:'c'+Date.now(), name:fd.get('catName'), color:fd.get('catColor')}); 
+            saveData(); renderCategoriesList(); e.target.reset(); 
+        }
+        function deleteCategory(id) { if(state.categories.length>1 && confirm('¿Borrar?')) { state.categories = state.categories.filter(c=>c.id!==id); saveData(); renderCategoriesList(); } }
+        function renderCategoriesList() {
+            const container = document.getElementById('categories-list');
+            const picker = document.getElementById('cat-color-picker-container');
+            
+            // Render Color Picker in Form
+            if(picker) {
+                picker.innerHTML = Object.keys(COLOR_DOTS).map(k => `
+                    <div onclick="selectCatColor('${k}')" class="w-8 h-8 rounded-full cursor-pointer hover:scale-110 transition-transform ring-2 ring-transparent hover:ring-gray-300" style="background-color: ${COLOR_DOTS[k]}"></div>
+                `).join('');
+            }
+
+            container.innerHTML = state.categories.map(c => {
+                // Handle hex vs preset
+                const isHex = c.color.startsWith('#');
+                const dotStyle = isHex ? `background-color: ${c.color}` : `background-color: ${COLOR_DOTS[c.color] || '#ccc'}`;
+                
+                return `<div class="flex justify-between p-2 theme-card rounded-lg items-center mb-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-4 h-4 rounded-full" style="${dotStyle}"></div>
+                        <span class="text-sm font-medium" style="color:var(--text-main)">${c.name}</span>
+                    </div>
+                    <button onclick="deleteCategory('${c.id}')" class="text-gray-400 hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        window.selectCatColor = function(c) {
+            document.getElementById('new-cat-color').value = c;
+            // Visual feedback could be improved, but functional
+        }
+
         function renderStats() {
             const today = DAYS_FULL[getNowInTimezone().getDay()];
             const pEl = document.getElementById('pending-count'); if(pEl) pEl.textContent = state.todos.filter(t => !t.completed).length;
@@ -798,23 +876,7 @@
         }
 
         function renderDays() {
-            // Calculate Monday based on viewDate
-            const currentDayNum = viewDate.getDay(); 
-            const diff = viewDate.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); 
-            const monday = new Date(viewDate); // Clone viewDate
-            monday.setDate(diff);
-
-            const now = getNowInTimezone();
-            const todayString = now.toDateString();
-            
-            // Update Month Label
-            const monthLabel = document.getElementById('current-month-label');
-            if (monthLabel) {
-                 const monthName = MONTHS[monday.getMonth()];
-                 const year = monday.getFullYear();
-                 monthLabel.textContent = `${monthName} ${year}`;
-            }
-
+            const now = getNowInTimezone(); const currentDayNum = now.getDay(); const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff)); const todayString = now.toDateString();
             let html = '';
             for(let i=0; i<7; i++) {
                 let d = new Date(monday); d.setDate(monday.getDate() + i);
@@ -827,50 +889,20 @@
             }
             document.getElementById('day-selector').innerHTML = html;
         }
-
         function setDay(i) { state.currentDayIndex = i; render(); }
-        function goToToday() { 
-            viewDate = getNowInTimezone(); 
-            // Also need to set correct day index for today
-            const dayIndex = viewDate.getDay() === 0 ? 6 : viewDate.getDay() - 1;
-            state.currentDayIndex = dayIndex;
-            render(); 
-        }
-        function changeWeek(offset) {
-            viewDate.setDate(viewDate.getDate() + (offset * 7));
-            render();
-        }
+        function goToToday() { const now = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; setDay(dayIndex); }
 
         function renderSchedule() {
-            const list = document.getElementById('schedule-list'); 
-            
-            // Calculate specific selected date
-            const currentDayNum = viewDate.getDay(); 
-            const diff = viewDate.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); 
-            const monday = new Date(viewDate); 
-            monday.setDate(diff);
-            
-            const selectedDate = new Date(monday); 
-            selectedDate.setDate(monday.getDate() + state.currentDayIndex); 
-            const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
-            const selectedDateStr = selectedDate.toISOString().split('T')[0];
-
-            // Filter logic: Match specific date OR match day name if no specific date is set (recurring)
-            const items = state.schedule.filter(s => {
-                if (s.specificDate) {
-                    return s.specificDate === selectedDateStr;
-                }
-                return s.day === dayName;
-            }).sort((a,b)=>a.time.localeCompare(b.time));
-            
+            const list = document.getElementById('schedule-list'); const now = new Date(); const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); const monday = new Date(now.setDate(diff)); const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex); const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
+            const items = state.schedule.filter(s => s.day === dayName).sort((a,b)=>a.time.localeCompare(b.time));
             if(items.length === 0) { list.innerHTML = `<div class="flex flex-col items-center justify-center h-64 opacity-40"><i data-lucide="coffee" class="w-12 h-12 mb-2"></i><p class="text-sm">Nada para el ${dayName}</p></div>`; return; }
             list.innerHTML = items.map(item => {
                 const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
-                const colorMap = {blue:'bg-blue-500', orange:'bg-orange-500', purple:'bg-purple-500', red:'bg-red-500', green:'bg-green-500'};
-                // Added indicator for recurring vs specific
-                const typeIcon = item.specificDate ? '' : '<i data-lucide="repeat" class="w-3 h-3 opacity-50 ml-2"></i>';
+                // Handle colors (hex or preset)
+                const isHex = cat.color.startsWith('#');
+                const dotStyle = isHex ? `background-color: ${cat.color}` : `background-color: ${COLOR_DOTS[cat.color] || '#ccc'}`;
                 
-                return `<div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-200 dark:border-gray-700 pr-2 pt-1"><span class="font-bold text-sm" style="color: var(--text-main);">${item.time}</span></div><div class="flex-1 min-w-0 pr-8"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full ${colorMap[cat.color] || 'bg-gray-400'}"></span><span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">${cat.name}</span>${typeIcon}</div><h3 class="font-bold truncate text-lg" style="color: var(--text-main);">${item.title}</h3>${item.desc ? `<p class="text-sm truncate" style="color: var(--text-muted);">${item.desc}</p>` : ''}</div><button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 opacity-40 hover:opacity-100 hover:text-red-500 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                return `<div class="theme-card backdrop-blur-md p-4 rounded-2xl shadow-sm flex gap-4 active:scale-[0.98] transition-transform relative group" onclick="openModal('schedule', '${item.id}')"><div class="flex flex-col items-center w-12 border-r border-gray-200 dark:border-gray-700 pr-2 pt-1"><span class="font-bold text-sm" style="color: var(--text-main);">${item.time}</span></div><div class="flex-1 min-w-0 pr-8"><div class="flex items-center gap-2 mb-1"><span class="w-2 h-2 rounded-full" style="${dotStyle}"></span><span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-muted);">${cat.name}</span></div><h3 class="font-bold truncate text-lg" style="color: var(--text-main);">${item.title}</h3>${item.desc ? `<p class="text-sm truncate" style="color: var(--text-muted);">${item.desc}</p>` : ''}</div><button onclick="event.stopPropagation(); deleteItem('schedule', '${item.id}')" class="absolute top-4 right-4 p-1.5 opacity-40 hover:opacity-100 hover:text-red-500 rounded-lg transition-all" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
             }).join('');
         }
 
@@ -879,8 +911,19 @@
             if(items.length === 0) { list.innerHTML = '<div class="p-8 text-center text-sm opacity-50">Sin tareas pendientes</div>'; return; }
             list.innerHTML = items.map(item => {
                 const cat = state.categories.find(c=>c.id===item.categoryId) || {color:'gray', name:''};
-                const bgClass = COLORS[cat.color] || 'bg-gray-100 text-gray-500';
-                return `<div class="flex items-center gap-3 p-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${bgClass}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
+                
+                // Dynamic styling for tags
+                const isHex = cat.color.startsWith('#');
+                let tagStyle = '';
+                let tagClass = 'text-[10px] font-bold px-1.5 py-0.5 rounded';
+                
+                if (isHex) {
+                    tagStyle = `background-color: ${cat.color}20; color: ${cat.color};`; // 20% opacity bg
+                } else {
+                    tagClass += ` ${COLORS[cat.color] || 'bg-gray-100 text-gray-500'}`;
+                }
+
+                return `<div class="flex items-center gap-3 p-3 mb-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0 last:mb-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><span class="${tagClass}" style="${tagStyle}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
             }).join('');
         }
 
