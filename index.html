@@ -133,11 +133,13 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        .sync-badge { font-size: 10px; padding: 2px 6px; border-radius: 99px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
-        .sync-active { background-color: rgba(52, 211, 153, 0.2); color: #10b981; }
-        .sync-offline { background-color: rgba(156, 163, 175, 0.2); color: #6b7280; }
-        [data-theme="dark"] .sync-offline { color: #9ca3af; }
-        
+        /* Sync Indicator Animation */
+        @keyframes blink-green-gray {
+            0%, 100% { background-color: #22c55e; box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); }
+            50% { background-color: #9ca3af; box-shadow: none; }
+        }
+        .dot-blink-green { animation: blink-green-gray 3s infinite ease-in-out; }
+
         .nav-btn-active { color: var(--accent-color) !important; }
         .settings-tab-active { background-color: var(--card-bg); color: var(--accent-color) !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -169,7 +171,7 @@
             
             <!-- Left: Traffic Lights & Title -->
             <div class="flex items-center gap-4 z-20">
-                <div class="flex gap-2">
+                <div class="hidden md:flex gap-2">
                     <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E]/50 cursor-pointer shadow-sm"></div>
                     <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24]/50 cursor-pointer shadow-sm"></div>
                     <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
@@ -181,10 +183,11 @@
                     <span>MyDay OS</span>
                 </div>
 
-                <!-- Mobile Title -->
-                <div class="md:hidden text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
-                    <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
-                    <span id="header-title">MyDay</span>
+                <!-- Mobile Title with Sync Indicator Integrated -->
+                <div class="md:hidden flex items-center gap-3">
+                    <div class="text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
+                        <span id="header-title">MyDay</span>
+                    </div>
                 </div>
             </div>
             
@@ -195,9 +198,9 @@
             </div>
             
             <!-- Right: Actions -->
-            <div class="flex items-center gap-4 z-20">
-                <!-- Indicador de Sincronización -->
-                <div id="sync-status-indicator" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300" title="Estado de Nube">
+            <div class="flex items-center gap-3 z-20">
+                <!-- Indicador de Sincronización (Siempre visible) -->
+                <div id="sync-status-indicator" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all duration-300 shadow-sm" title="Estado de Nube">
                     <!-- Contenido inyectado por JS -->
                 </div>
 
@@ -658,7 +661,7 @@
             } else if (status === 'online') {
                 containerClass = 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
                 dotClass = 'dot-blink-green'; 
-                text = 'En línea';
+                text = 'Online';
             } else if (status === 'local') {
                 containerClass = 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
                 dotClass = 'bg-gray-400';
