@@ -103,7 +103,7 @@
         /* Mobile */
         @media (max-width: 768px) {
             body { padding: 0 !important; background-image: none !important; background-color: var(--bg-color) !important; }
-            body { background-image: var(--bg-image-default) !important; } /* Restore gradient if desired */
+            body { background-image: var(--bg-image-default) !important; }
             .glass-panel { width: 100% !important; height: 100dvh !important; max-width: none !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important; }
             .mobile-hidden { display: none !important; }
             .mobile-flex { display: flex !important; }
@@ -290,22 +290,29 @@
         <!-- Toasts -->
         <div id="toast-container" class="absolute top-16 right-5 z-[60] flex flex-col gap-3 pointer-events-none w-80 max-w-[90vw]"></div>
 
-        <!-- MODAL -->
+        <!-- MODAL UNIVERSAL -->
         <div id="modal" class="absolute inset-0 z-50 hidden">
             <div class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeModal()"></div>
             <div class="absolute inset-0 flex items-end md:items-center justify-center p-0 md:p-4 pointer-events-none">
                 <div class="theme-modal w-full md:w-full md:max-w-lg rounded-t-2xl md:rounded-2xl shadow-2xl overflow-hidden transform translate-y-full md:scale-95 md:translate-y-0 opacity-0 transition-all duration-300 pointer-events-auto border border-gray-100 dark:border-gray-700 flex flex-col max-h-[90vh]" id="modal-content">
                     <div class="p-6 overflow-y-auto">
+                        <!-- Drag Handle -->
                         <div class="w-12 h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full mx-auto mb-4 md:hidden"></div>
+                        
                         <div class="flex justify-between items-center mb-6">
-                            <div><h3 class="text-xl font-bold" id="modal-title" style="color: var(--text-main);">Título</h3><p class="text-sm opacity-60" id="modal-subtitle" style="color: var(--text-main);">Subtítulo</p></div>
+                            <div>
+                                <h3 class="text-xl font-bold" id="modal-title" style="color: var(--text-main);">Título</h3>
+                                <p class="text-sm opacity-60" id="modal-subtitle" style="color: var(--text-main);">Subtítulo</p>
+                            </div>
                             <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors" style="color: var(--text-main);"><i data-lucide="x" class="w-4 h-4"></i></button>
                         </div>
+                        
                         <form id="modal-form" onsubmit="handleFormSubmit(event)" class="space-y-5">
                             <div id="form-fields"></div>
-                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6">
-                                <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cancelar</button>
-                                <button type="submit" class="px-6 py-3 md:py-2.5 rounded-xl btn-primary font-medium shadow-lg shadow-blue-500/20 transition transform active:scale-95 text-sm flex items-center justify-center gap-2 flex-1 md:flex-none"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button>
+                            
+                            <!-- Footer Buttons -->
+                            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6" id="modal-footer">
+                                <!-- Injected dynamically -->
                             </div>
                         </form>
                     </div>
@@ -539,38 +546,111 @@
                 else if(type === 'note') data = state.notes.find(x => x.id === id);
             }
             
-            document.getElementById('modal-title').textContent = id ? 'Editar' : 'Nuevo';
-            const inputClass = "w-full px-4 py-3 rounded-xl theme-input border outline-none transition-colors";
+            // Branch logic: View Mode (Read Only) or Edit/Create Mode
+            if (id && (type === 'note' || type === 'schedule')) {
+                 renderViewMode(type, data);
+            } else {
+                 renderEditMode(type, data);
+            }
 
+            modal.classList.remove('hidden'); 
+            setTimeout(() => { 
+                backdrop.classList.remove('opacity-0'); 
+                content.classList.add('md:scale-100', 'translate-y-0'); 
+                content.classList.remove('translate-y-full', 'opacity-0', 'md:scale-95'); 
+            }, 10);
+        }
+
+        function renderViewMode(type, data) {
+            const fields = document.getElementById('form-fields');
+            const footer = document.getElementById('modal-footer');
+            document.getElementById('modal-title').innerText = 'Detalles';
+            document.getElementById('modal-subtitle').innerText = type === 'note' ? 'Vista previa' : 'Evento';
+            
+            let contentHtml = '';
             if (type === 'note') {
-                document.getElementById('modal-subtitle').textContent = 'Nota rápida';
+                contentHtml = `
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white leading-tight border-b pb-4 border-gray-100 dark:border-gray-700">${data.title}</h3>
+                        <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed text-lg min-h-[100px]">${data.content}</div>
+                        <div class="flex items-center gap-2 mt-4">
+                           <div class="w-3 h-3 rounded-full" style="background-color: ${data.color || 'var(--accent-color)'}"></div>
+                           <span class="text-xs text-gray-400">${new Date(data.date).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            } else if (type === 'schedule') {
+                contentHtml = `
+                    <div class="space-y-5">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">${data.title}</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl">
+                                 <span class="block text-xs text-gray-500 mb-1">Hora</span>
+                                 <span class="font-bold text-gray-800 dark:text-gray-200 text-lg">${data.time}</span>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl">
+                                 <span class="block text-xs text-gray-500 mb-1">Día</span>
+                                 <span class="font-bold text-gray-800 dark:text-gray-200 text-lg">${data.day}</span>
+                            </div>
+                        </div>
+                        ${data.desc ? `
+                        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
+                            <span class="block text-xs text-gray-500 mb-2">Notas</span>
+                            <p class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">${data.desc}</p>
+                        </div>` : ''}
+                    </div>
+                `;
+            }
+            fields.innerHTML = contentHtml;
+            
+            // Botón de Editar en Footer
+            footer.innerHTML = `
+                <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cerrar</button>
+                <button type="button" onclick="renderEditMode('${type}', state.${type === 'schedule' ? 'schedule' : 'notes'}.find(x=>x.id==='${data.id}'))" class="w-full md:w-auto px-6 py-3 md:py-2.5 rounded-xl bg-gray-900 dark:bg-blue-600 text-white font-medium shadow-lg hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2">
+                    <i data-lucide="pencil" class="w-4 h-4"></i> Editar
+                </button>
+            `;
+            lucide.createIcons();
+        }
+
+        window.renderEditMode = function(type, data = null) {
+             const fields = document.getElementById('form-fields');
+             const footer = document.getElementById('modal-footer');
+             const inputClass = "w-full px-4 py-3 rounded-xl theme-input border outline-none transition-colors";
+             
+             document.getElementById('modal-title').innerText = data ? 'Editar' : 'Nuevo';
+             document.getElementById('modal-subtitle').innerText = type === 'note' ? 'Escribe tu nota' : (type === 'schedule' ? 'Detalles del evento' : 'Tarea');
+             
+             if (type === 'note') {
                 const colors = ['#007aff', '#ff9500', '#34c759', '#ff2d55', '#af52de'];
                 const colorPicker = colors.map(c => `
                     <div onclick="selectNoteColor('${c}')" class="w-8 h-8 rounded-full cursor-pointer ring-2 ring-offset-2 ring-transparent hover:scale-110 transition-transform ${data && data.color === c ? 'ring-gray-400' : ''}" style="background-color: ${c}"></div>
                 `).join('');
-                
                 fields.innerHTML = `
-                    <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg" placeholder="Título de la nota">
+                    <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg mb-4" placeholder="Título de la nota">
                     <textarea name="content" class="${inputClass} h-40 resize-none" placeholder="Escribe aquí...">${data?data.content:''}</textarea>
                     <div class="flex gap-3 pt-2 justify-center">${colorPicker}</div>
                     <input type="hidden" name="color" id="note-color-input" value="${data?data.color:'#007aff'}">
                 `;
             } else if(type === 'schedule') {
-                document.getElementById('modal-subtitle').textContent = 'Evento';
                 const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
                 const days = DAYS_FULL.map(d=>`<option value="${d}" ${(data&&data.day===d)||(!data&&DAYS_FULL[getNowInTimezone().getDay()]===d)?'selected':''}>${d}</option>`).join('');
                 fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1 opacity-60">Título</label><input type="text" name="title" value="${data?data.title:''}" required class="${inputClass}" placeholder="Ej. Examen"></div><div class="grid grid-cols-2 gap-4"><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Día</label><select name="day" class="${inputClass}">${days}</select></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Hora</label><input type="time" name="time" value="${data?data.time:'09:00'}" required class="${inputClass}"></div></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Notas</label><textarea name="desc" class="${inputClass} h-20 resize-none">${data?data.desc||'':''}</textarea></div>`;
             } else {
-                document.getElementById('modal-subtitle').textContent = 'Tarea';
                 const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
                 fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1 opacity-60">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}"></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>`;
             }
-            modal.classList.remove('hidden'); setTimeout(() => { backdrop.classList.remove('opacity-0'); content.classList.add('md:scale-100', 'translate-y-0'); content.classList.remove('translate-y-full', 'opacity-0', 'md:scale-95'); }, 10);
+            
+            // Restore Save Button
+            footer.innerHTML = `
+                <button type="button" onclick="closeModal()" class="px-5 py-3 md:py-2.5 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition text-sm flex-1 md:flex-none justify-center flex">Cancelar</button>
+                <button type="submit" class="px-6 py-3 md:py-2.5 rounded-xl btn-primary font-medium shadow-lg shadow-blue-500/20 transition transform active:scale-95 text-sm flex items-center justify-center gap-2 flex-1 md:flex-none"><i data-lucide="save" class="w-4 h-4"></i> Guardar</button>
+            `;
+            lucide.createIcons();
         }
 
         window.selectNoteColor = function(c) {
             document.getElementById('note-color-input').value = c;
-            // Visual feedback could be added here
         }
 
         function closeModal() {
