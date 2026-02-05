@@ -4,10 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#f2f2f7">
+    
+    <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Favicon -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MyDay">
+    <meta name="application-name" content="MyDay OS">
     <link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg" type="image/svg+xml">
-    <title>MyDay OS 3.0 - Google Sync</title>
+    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg">
+    <link id="manifest-link" rel="manifest" href="">
+
+    <title>MyDay OS 3.0 - PWA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Firebase SDKs -->
@@ -78,6 +85,7 @@
         .text-accent { color: var(--accent-color) !important; }
         .bg-accent { background-color: var(--accent-color) !important; }
         .border-accent { border-color: var(--accent-color) !important; }
+        .ring-accent { --tw-ring-color: var(--accent-color) !important; }
         .btn-primary { background-color: var(--accent-color); color: white; }
         .btn-primary:hover { opacity: 0.9; }
 
@@ -125,15 +133,11 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
-        /* Animation for Status Dot */
-        @keyframes blink-green-gray {
-            0%, 100% { background-color: #22c55e; transform: scale(1); }
-            50% { background-color: #9ca3af; transform: scale(0.85); }
-        }
-        .dot-blink-green {
-            animation: blink-green-gray 4s infinite ease-in-out;
-        }
-
+        .sync-badge { font-size: 10px; padding: 2px 6px; border-radius: 99px; display: flex; align-items: center; gap: 4px; font-weight: 600; }
+        .sync-active { background-color: rgba(52, 211, 153, 0.2); color: #10b981; }
+        .sync-offline { background-color: rgba(156, 163, 175, 0.2); color: #6b7280; }
+        [data-theme="dark"] .sync-offline { color: #9ca3af; }
+        
         .nav-btn-active { color: var(--accent-color) !important; }
         .settings-tab-active { background-color: var(--card-bg); color: var(--accent-color) !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -235,7 +239,7 @@
 
                         <!-- Month Label & Add Button -->
                         <div class="flex justify-between items-end mb-2 px-1">
-                             <span id="current-month-label" class="text-xs font-bold uppercase tracking-widest opacity-50" style="color: var(--text-main);">Enero 2024</span>
+                             <span id="current-month-label" class="text-xs font-bold uppercase tracking-widest opacity-50" style="color: var(--text-main);">Cargando...</span>
                              <button onclick="openModal('schedule')" class="w-7 h-7 rounded-full bg-white dark:bg-gray-800 shadow-sm hover:shadow text-accent flex items-center justify-center transition-all hover:scale-105 active:scale-95 border border-black/5 dark:border-white/10">
                                 <i data-lucide="plus" class="w-4 h-4"></i>
                             </button>
@@ -362,6 +366,8 @@
                     <!-- Pestaña General -->
                     <div id="tab-general" class="settings-content block">
                         <h2 class="text-xl font-bold mb-4">Personalización</h2>
+                        
+                        <!-- URL Input -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Imagen Personalizada</label>
                             <div class="flex gap-2">
@@ -369,6 +375,8 @@
                                 <button onclick="saveBackground()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors shadow-sm">Aplicar</button>
                             </div>
                         </div>
+
+                        <!-- Zona Horaria -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-2 opacity-60">Zona Horaria</label>
                             <select id="timezone-select" onchange="saveTimezone()" class="theme-input w-full rounded-xl px-4 py-2 text-sm outline-none">
@@ -384,24 +392,20 @@
                                 <option value="America/Lima">🇵🇪 Lima (PET)</option>
                             </select>
                         </div>
+
+                        <!-- Color de Acento -->
                         <div class="mb-6">
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Color de Acento</label>
-                            <div class="flex gap-3 flex-wrap">
-                                <button onclick="setAccentColor('#007aff')" class="w-8 h-8 rounded-full bg-blue-500 ring-2 ring-transparent hover:ring-blue-300 transition-all"></button>
-                                <button onclick="setAccentColor('#af52de')" class="w-8 h-8 rounded-full bg-purple-500 ring-2 ring-transparent hover:ring-purple-300 transition-all"></button>
-                                <button onclick="setAccentColor('#ff2d55')" class="w-8 h-8 rounded-full bg-pink-500 ring-2 ring-transparent hover:ring-pink-300 transition-all"></button>
-                                <button onclick="setAccentColor('#ff9500')" class="w-8 h-8 rounded-full bg-orange-500 ring-2 ring-transparent hover:ring-orange-300 transition-all"></button>
-                                <button onclick="setAccentColor('#34c759')" class="w-8 h-8 rounded-full bg-green-500 ring-2 ring-transparent hover:ring-green-300 transition-all"></button>
-                                <button onclick="setAccentColor('#ff3b30')" class="w-8 h-8 rounded-full bg-red-500 ring-2 ring-transparent hover:ring-red-300 transition-all"></button>
+                            <div class="flex gap-3 flex-wrap" id="accent-colors-container">
+                                <!-- Populated by JS -->
                             </div>
                         </div>
+
+                        <!-- Presets -->
                         <div>
                             <label class="block text-xs font-bold uppercase mb-3 opacity-60">Fondos Predeterminados</label>
-                            <div class="flex gap-3 flex-wrap">
-                                <button onclick="setPresetBg('nature')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600')" title="Naturaleza"></button>
-                                <button onclick="setPresetBg('dark')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600')" title="Oscuro"></button>
-                                <button onclick="setPresetBg('abstract')" class="w-12 h-12 rounded-full bg-cover ring-2 ring-transparent hover:ring-blue-500 transition-all shadow-sm transform hover:scale-105" style="background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600')" title="Abstracto"></button>
-                                <button onclick="setPresetBg('white')" class="w-12 h-12 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-all shadow-sm transform hover:scale-105" title="Limpiar Fondo"><i data-lucide="ban" class="w-5 h-5"></i></button>
+                            <div class="flex gap-3 flex-wrap" id="background-presets-container">
+                                <!-- Populated by JS -->
                             </div>
                         </div>
                     </div>
@@ -420,8 +424,30 @@
 
                     <div id="tab-categories" class="settings-content hidden">
                         <h2 class="text-xl font-bold mb-4">Categorías</h2>
-                        <form onsubmit="handleAddCategory(event)" class="flex gap-2 mb-4"><input type="text" name="catName" placeholder="Nombre" class="theme-input flex-1 px-3 py-2 rounded-lg outline-none text-sm" required><select name="catColor" class="theme-input px-3 py-2 rounded-lg outline-none text-sm"><option value="blue">Azul</option><option value="red">Rojo</option><option value="green">Verde</option><option value="purple">Morado</option><option value="orange">Naranja</option></select><button type="submit" class="p-2 btn-primary text-white rounded-lg"><i data-lucide="plus" class="w-4 h-4"></i></button></form>
-                        <div id="categories-list" class="space-y-2"></div>
+                        <form onsubmit="handleAddCategory(event)" class="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <div class="mb-3">
+                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Nombre</label>
+                                <input type="text" name="catName" placeholder="Ej. Universidad" class="theme-input w-full px-3 py-2 rounded-lg outline-none text-sm" required>
+                            </div>
+                            
+                            <label class="block text-xs font-bold uppercase mb-2 opacity-60">Color</label>
+                            <div class="grid grid-cols-6 gap-2 mb-3" id="cat-color-picker-container">
+                                <!-- Colors injected here -->
+                            </div>
+                            <input type="hidden" name="catColor" id="new-cat-color" value="blue">
+
+                            <div class="mt-4 border-t pt-4 border-gray-200 dark:border-gray-600">
+                                <label class="block text-xs font-bold uppercase mb-2 opacity-60">Personalizado</label>
+                                <div class="flex items-center gap-2">
+                                     <input type="color" id="custom-cat-color" class="w-8 h-8 rounded cursor-pointer border-0 p-0" onchange="document.getElementById('new-cat-color').value = this.value">
+                                     <span class="text-xs opacity-50">Elige un tono exacto</span>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="w-full mt-4 py-2 btn-primary text-white rounded-lg font-medium text-sm">Agregar Categoría</button>
+                        </form>
+                        <div class="text-xs font-bold uppercase mb-3 opacity-60">Existentes</div>
+                        <div id="categories-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
                     </div>
 
                     <div id="tab-data" class="settings-content hidden">
@@ -462,42 +488,49 @@
         const DAYS_FULL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
         const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         
-        // Expanded Color Palette (Name -> Tailwind Class Base)
+        // Expanded Color Palette
         const COLORS = { 
-            blue:'bg-blue-100 text-blue-700', 
-            red:'bg-red-100 text-red-700', 
-            green:'bg-green-100 text-green-700', 
-            purple:'bg-purple-100 text-purple-700', 
-            orange:'bg-orange-100 text-orange-700',
-            pink: 'bg-pink-100 text-pink-700',
-            teal: 'bg-teal-100 text-teal-700',
-            indigo: 'bg-indigo-100 text-indigo-700',
-            cyan: 'bg-cyan-100 text-cyan-700',
-            lime: 'bg-lime-100 text-lime-700',
-            rose: 'bg-rose-100 text-rose-700',
-            amber: 'bg-amber-100 text-amber-700',
-            sky: 'bg-sky-100 text-sky-700',
-            emerald: 'bg-emerald-100 text-emerald-700',
-            violet: 'bg-violet-100 text-violet-700',
-            gray: 'bg-gray-100 text-gray-700'
+            blue:'bg-blue-100 text-blue-700', red:'bg-red-100 text-red-700', green:'bg-green-100 text-green-700', purple:'bg-purple-100 text-purple-700', orange:'bg-orange-100 text-orange-700',
+            pink: 'bg-pink-100 text-pink-700', teal: 'bg-teal-100 text-teal-700', indigo: 'bg-indigo-100 text-indigo-700', cyan: 'bg-cyan-100 text-cyan-700', lime: 'bg-lime-100 text-lime-700',
+            rose: 'bg-rose-100 text-rose-700', amber: 'bg-amber-100 text-amber-700', sky: 'bg-sky-100 text-sky-700', emerald: 'bg-emerald-100 text-emerald-700', violet: 'bg-violet-100 text-violet-700', gray: 'bg-gray-100 text-gray-700'
         };
 
-        // For Color Dots in Settings
         const COLOR_DOTS = {
             blue: '#3b82f6', red: '#ef4444', green: '#22c55e', purple: '#a855f7', orange: '#f97316',
             pink: '#ec4899', teal: '#14b8a6', indigo: '#6366f1', cyan: '#06b6d4', lime: '#84cc16',
             rose: '#f43f5e', amber: '#f59e0b', sky: '#0ea5e9', emerald: '#10b981', violet: '#8b5cf6',
             gray: '#6b7280'
         };
+        
+        const ACCENT_OPTIONS = [
+             { color: '#007aff', name: 'Blue' }, { color: '#af52de', name: 'Purple' },
+             { color: '#ff2d55', name: 'Pink' }, { color: '#ff9500', name: 'Orange' },
+             { color: '#34c759', name: 'Green' }, { color: '#ff3b30', name: 'Red' }
+        ];
+
+        const BACKGROUND_PRESETS = [
+            { type: 'nature', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600' },
+            { type: 'dark', url: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600' },
+            { type: 'abstract', url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600' },
+            { type: 'white', url: '' } // Empty string for default
+        ];
 
         // INIT
         try { firebase.initializeApp(USER_FIREBASE_CONFIG); auth = firebase.auth(); db = firebase.firestore(); appId = USER_FIREBASE_CONFIG.projectId; isCloudAvailable = true; } catch(e) { console.log("Offline"); }
 
         function init() {
+            // PWA Manifest Injection
+            const manifest = {
+                name: "MyDay OS", short_name: "MyDay", start_url: ".", display: "standalone",
+                background_color: "#f2f2f7", theme_color: "#f2f2f7",
+                icons: [{ src: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg", sizes: "192x192", type: "image/svg+xml" }]
+            };
+            const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+            document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+
             const local = localStorage.getItem('myDayOS_v3');
             if(local) state = {...state, ...JSON.parse(local)};
             
-            // Sync viewDate to now
             viewDate = getNowInTimezone();
             
             applyTheme();
@@ -509,6 +542,39 @@
             setInterval(checkNotifications, 60000);
             updateClock();
         }
+
+        // --- RENDER SETTINGS UI DYNAMICALLY ---
+        function renderSettingsGeneral() {
+            // Render Accents
+            const accentContainer = document.getElementById('accent-colors-container');
+            if (accentContainer) {
+                accentContainer.innerHTML = ACCENT_OPTIONS.map(opt => {
+                    const isSelected = state.settings.accentColor === opt.color;
+                    const ringClass = isSelected ? 'ring-2 ring-offset-2 ring-gray-400 dark:ring-gray-500' : 'ring-2 ring-transparent';
+                    return `<button onclick="setAccentColor('${opt.color}')" class="w-8 h-8 rounded-full transition-all ${ringClass}" style="background-color: ${opt.color}" title="${opt.name}"></button>`;
+                }).join('');
+            }
+
+            // Render Backgrounds
+            const bgContainer = document.getElementById('background-presets-container');
+            if (bgContainer) {
+                bgContainer.innerHTML = BACKGROUND_PRESETS.map(bg => {
+                    const isSelected = state.settings.bgUrl === bg.url;
+                    // For white preset, we check if url is empty
+                    const ringClass = isSelected ? 'ring-4 ring-offset-2 ring-blue-500' : 'ring-2 ring-transparent hover:ring-blue-300';
+                    const content = bg.type === 'white' ? '<i data-lucide="ban" class="w-5 h-5 text-gray-400"></i>' : '';
+                    const style = bg.type !== 'white' ? `background-image: url('${bg.url}')` : 'background-color: white';
+                    const checkIcon = isSelected ? '<div class="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full"><i data-lucide="check" class="w-6 h-6 text-white"></i></div>' : '';
+                    
+                    return `<button onclick="setPresetBg('${bg.type}')" class="relative w-12 h-12 rounded-full bg-cover transition-all ${ringClass}" style="${style}" title="${bg.type}">
+                        ${content}
+                        ${checkIcon}
+                    </button>`;
+                }).join('');
+                lucide.createIcons();
+            }
+        }
+
 
         // --- CORE FUNCTIONS ---
         function getNowInTimezone() {
@@ -583,9 +649,7 @@
             // Reset base classes
             el.className = 'sync-badge hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
             
-            let dotClass = '';
-            let text = '';
-            let containerClass = '';
+            let dotClass = '', text = '', containerClass = '';
 
             if (status === 'syncing') {
                 containerClass = 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
@@ -734,12 +798,14 @@
              if (type === 'note') {
                 const colors = ['#007aff', '#ff9500', '#34c759', '#ff2d55', '#af52de'];
                 const colorPicker = colors.map(c => `
-                    <div onclick="selectNoteColor('${c}')" class="w-8 h-8 rounded-full cursor-pointer ring-2 ring-offset-2 ring-transparent hover:scale-110 transition-transform ${data && data.color === c ? 'ring-gray-400' : ''}" style="background-color: ${c}"></div>
+                    <div onclick="selectNoteColor('${c}', this)" class="w-8 h-8 rounded-full cursor-pointer ring-2 ring-offset-2 transition-transform ${data && data.color === c ? 'ring-gray-400' : 'ring-transparent'} hover:scale-110" style="background-color: ${c}"></div>
                 `).join('');
                 fields.innerHTML = `
-                    <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg mb-4" placeholder="Título de la nota">
+                    <div class="mb-4">
+                        <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg" placeholder="Título de la nota">
+                    </div>
                     <textarea name="content" class="${inputClass} h-40 resize-none" placeholder="Escribe aquí...">${data?data.content:''}</textarea>
-                    <div class="flex gap-3 pt-2 justify-center">${colorPicker}</div>
+                    <div class="flex gap-3 pt-2 justify-center" id="note-color-picker-container">${colorPicker}</div>
                     <input type="hidden" name="color" id="note-color-input" value="${data?data.color:'#007aff'}">
                 `;
             } else if(type === 'schedule') {
@@ -790,7 +856,27 @@
                 `;
             } else {
                 const cats = state.categories.map(c=>`<option value="${c.id}" ${data&&data.categoryId===c.id?'selected':''}>${c.name}</option>`).join('');
-                fields.innerHTML = `<div><label class="text-xs font-bold uppercase mb-1 opacity-60">Tarea</label><input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}"></div><div><label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label><select name="categoryId" class="${inputClass}">${cats}</select></div>`;
+                const deadlineDate = data?.deadline ? new Date(data.deadline).toISOString().split('T')[0] : '';
+                const deadlineTime = data?.deadline ? new Date(data.deadline).toTimeString().substring(0,5) : '';
+
+                fields.innerHTML = `
+                    <div class="mb-4">
+                        <label class="text-xs font-bold uppercase mb-1 opacity-60">Tarea</label>
+                        <input type="text" name="text" value="${data?data.text:''}" required class="${inputClass}" placeholder="Ej. Comprar leche">
+                    </div>
+                    <div class="mb-4">
+                        <label class="text-xs font-bold uppercase mb-1 opacity-60">Categoría</label>
+                        <select name="categoryId" class="${inputClass}">${cats}</select>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-xl border border-gray-100 dark:border-gray-700">
+                        <div class="text-xs font-bold uppercase mb-2 opacity-60">Fecha Límite (Opcional)</div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" name="deadlineDate" value="${deadlineDate}" class="${inputClass}">
+                            <input type="time" name="deadlineTime" value="${deadlineTime}" class="${inputClass}">
+                        </div>
+                    </div>
+                `;
             }
             
             footer.innerHTML = `
@@ -808,8 +894,15 @@
             else { dateContainer.classList.remove('hidden'); dayContainer.classList.add('hidden'); }
         }
 
-        window.selectNoteColor = function(c) {
+        window.selectNoteColor = function(c, el) {
             document.getElementById('note-color-input').value = c;
+            const container = document.getElementById('note-color-picker-container');
+            Array.from(container.children).forEach(child => {
+                child.classList.remove('ring-gray-400');
+                child.classList.add('ring-transparent');
+            });
+            el.classList.remove('ring-transparent');
+            el.classList.add('ring-gray-400');
         }
 
         function closeModal() {
@@ -833,7 +926,14 @@
                 };
                 if(id) { const idx = state.schedule.findIndex(x=>x.id===id); state.schedule[idx]=item; } else state.schedule.push(item);
             } else {
-                const item = { id: id||Date.now().toString(), text: fd.get('text'), categoryId: fd.get('categoryId'), completed: id?state.todos.find(x=>x.id===id).completed:false };
+                let deadline = null;
+                const dDate = fd.get('deadlineDate'); const dTime = fd.get('deadlineTime');
+                if (dDate) { deadline = new Date(`${dDate}T${dTime || '23:59'}`).toISOString(); }
+                const item = { 
+                    id: id||Date.now().toString(), 
+                    text: fd.get('text'), categoryId: fd.get('categoryId'), completed: id?state.todos.find(x=>x.id===id).completed:false,
+                    deadline: deadline
+                };
                 if(id) { const idx = state.todos.findIndex(x=>x.id===id); state.todos[idx]=item; } else state.todos.push(item);
             }
             saveData(); closeModal(); render();
@@ -843,7 +943,7 @@
             if(type==='schedule') state.schedule=state.schedule.filter(i=>i.id!==id); 
             else if(type==='note') state.notes=state.notes.filter(i=>i.id!==id);
             else state.todos=state.todos.filter(i=>i.id!==id); 
-            saveData(); render(); closeModal(); // Close modal if open
+            saveData(); render(); closeModal(); 
         }}
         
         function toggleTodo(id) { const t = state.todos.find(i=>i.id===id); if(t) { t.completed = !t.completed; saveData(); render(); } }
@@ -858,19 +958,15 @@
         function renderCategoriesList() {
             const container = document.getElementById('categories-list');
             const picker = document.getElementById('cat-color-picker-container');
-            
-            // Render Color Picker in Form
             if(picker) {
                 picker.innerHTML = Object.keys(COLOR_DOTS).map(k => `
-                    <div onclick="selectCatColor('${k}')" class="w-8 h-8 rounded-full cursor-pointer hover:scale-110 transition-transform ring-2 ring-transparent hover:ring-gray-300" style="background-color: ${COLOR_DOTS[k]}"></div>
+                    <div onclick="selectCatColor('${k}', this)" class="w-8 h-8 rounded-full cursor-pointer hover:scale-110 transition-transform ring-2 ring-transparent hover:ring-gray-300" style="background-color: ${COLOR_DOTS[k]}"></div>
                 `).join('');
             }
 
             container.innerHTML = state.categories.map(c => {
-                // Handle hex vs preset
                 const isHex = c.color.startsWith('#');
                 const dotStyle = isHex ? `background-color: ${c.color}` : `background-color: ${COLOR_DOTS[c.color] || '#ccc'}`;
-                
                 return `<div class="flex justify-between p-2 theme-card rounded-lg items-center mb-2">
                     <div class="flex items-center gap-3">
                         <div class="w-4 h-4 rounded-full" style="${dotStyle}"></div>
@@ -882,9 +978,18 @@
             lucide.createIcons();
         }
 
-        window.selectCatColor = function(c) {
+        window.selectCatColor = function(c, el) { 
             document.getElementById('new-cat-color').value = c;
-            // Visual feedback could be improved, but functional
+            // Visual feedback for category color picker
+            if (el) {
+                const container = document.getElementById('cat-color-picker-container');
+                Array.from(container.children).forEach(child => {
+                    child.classList.remove('ring-gray-400');
+                    child.classList.add('ring-transparent');
+                });
+                el.classList.remove('ring-transparent');
+                el.classList.add('ring-gray-400');
+            }
         }
 
         function renderStats() {
@@ -897,6 +1002,8 @@
 
         function renderDays() {
             const now = getNowInTimezone(); const currentDayNum = now.getDay(); const diff = now.getDate() - currentDayNum + (currentDayNum === 0 ? -6 : 1); const systemNow = new Date(); const monday = new Date(systemNow.setDate(diff)); const todayString = now.toDateString();
+            const monthLabel = document.getElementById('current-month-label');
+            if (monthLabel) { const monthName = MONTHS[viewDate.getMonth()]; const year = viewDate.getFullYear(); monthLabel.textContent = `${monthName} ${year}`; }
             let html = '';
             for(let i=0; i<7; i++) {
                 let d = new Date(monday); d.setDate(monday.getDate() + i);
@@ -910,7 +1017,7 @@
             document.getElementById('day-selector').innerHTML = html;
         }
         function setDay(i) { state.currentDayIndex = i; render(); }
-        function goToToday() { const now = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; setDay(dayIndex); }
+        function goToToday() { viewDate = getNowInTimezone(); const dayIndex = now.getDay() === 0 ? 6 : now.getDay() - 1; state.currentDayIndex = dayIndex; render(); }
 
         function renderSchedule() {
             const list = document.getElementById('schedule-list'); const now = new Date(); const diff = now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1); const monday = new Date(now.setDate(diff)); const selectedDate = new Date(monday); selectedDate.setDate(monday.getDate() + state.currentDayIndex); const dayName = DAYS_FULL[selectedDate.getDay() === 0 ? 0 : selectedDate.getDay()];
@@ -942,8 +1049,21 @@
                 } else {
                     tagClass += ` ${COLORS[cat.color] || 'bg-gray-100 text-gray-500'}`;
                 }
+                
+                // Deadline Logic
+                let deadlineHtml = '';
+                if (item.deadline) {
+                    const d = new Date(item.deadline);
+                    const now = new Date();
+                    const isOverdue = d < now && !item.completed;
+                    const dateStr = d.toLocaleDateString('es-ES', {month: 'short', day: 'numeric'});
+                    const timeStr = d.toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+                    
+                    const colorClass = isOverdue ? 'text-red-500 font-bold' : 'text-gray-400';
+                    deadlineHtml = `<div class="flex items-center gap-1 text-[10px] mt-1 ${colorClass}"><i data-lucide="clock" class="w-3 h-3"></i> ${dateStr} ${timeStr}</div>`;
+                }
 
-                return `<div class="flex items-center gap-3 p-3 mb-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0 last:mb-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><span class="${tagClass}" style="${tagStyle}">${cat.name}</span></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
+                return `<div class="flex items-center gap-3 p-3 mb-3 theme-card rounded-xl active:bg-gray-50 dark:active:bg-gray-700 transition border-b dark:border-gray-700 last:border-0 last:mb-0"><label class="custom-checkbox relative flex items-center justify-center w-6 h-6"><input type="checkbox" class="sr-only" ${item.completed?'checked':''} onchange="toggleTodo('${item.id}')"><div class="w-5 h-5 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-colors flex items-center justify-center"><i data-lucide="check" class="w-3.5 h-3.5 text-white"></i></div></label><div class="flex-1 min-w-0" onclick="openModal('todo', '${item.id}')"><p class="font-medium ${item.completed?'line-through opacity-50':''}" style="color: var(--text-main);" class="truncate text-base">${item.text}</p><div class="flex items-center gap-2 mt-1"><span class="${tagClass}" style="${tagStyle}">${cat.name}</span>${deadlineHtml}</div></div><button onclick="deleteItem('todo','${item.id}')" class="opacity-40 hover:opacity-100 hover:text-red-500 p-2"><i data-lucide="x" class="w-4 h-4"></i></button></div>`;
             }).join('');
         }
 
@@ -961,7 +1081,13 @@
             if (state.settings.theme === 'dark') { html.setAttribute('data-theme', 'dark'); html.classList.add('dark'); if(icon) { icon.setAttribute('data-lucide', 'sun'); icon.innerHTML = '<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>'; } } 
             else { html.removeAttribute('data-theme'); html.classList.remove('dark'); if(icon) { icon.setAttribute('data-lucide', 'moon'); icon.innerHTML = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>'; } }
         }
-        function setAccentColor(color) { state.settings.accentColor = color; saveData(); applySettings(); render(); }
+        function setAccentColor(color) { 
+            state.settings.accentColor = color; 
+            saveData(); 
+            applySettings(); 
+            render(); 
+            renderSettingsGeneral(); // Refresh settings UI to show selection
+        }
         function setupAuthListener() {
             if(!isCloudAvailable) return;
             auth.onAuthStateChanged(user => {
@@ -1013,15 +1139,15 @@
                 isSaving = false; 
             }, 1000); 
         }
-        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const bgInput = document.getElementById('bg-url-input'); if(bgInput) bgInput.value = state.settings.bgUrl || ''; switchSettingsTab('general'); renderCategoriesList(); }
+        function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const bgInput = document.getElementById('bg-url-input'); if(bgInput) bgInput.value = state.settings.bgUrl || ''; renderSettingsGeneral(); switchSettingsTab('general'); renderCategoriesList(); }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
         function switchSettingsTab(tabId) { document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden')); document.getElementById('tab-' + tabId).classList.remove('hidden'); document.querySelectorAll('.settings-tab-btn').forEach(btn => { if(btn.dataset.tab === tabId) { btn.classList.add('settings-tab-active'); btn.style.color = 'var(--accent-color)'; } else { btn.classList.remove('settings-tab-active'); btn.style.color = 'var(--text-main)'; } }); }
         function checkNotifications() { const now = getNowInTimezone(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const currentTime = `${hours}:${minutes}`; const currentDayName = DAYS_FULL[now.getDay()]; const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime); events.forEach(event => { showToast(`Es hora: ${event.title}`, 'Recordatorio'); if (state.settings.browserNotifications && Notification.permission === "granted") { try { new Notification("MyDay OS", { body: `Evento: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg", tag: `evt-${event.id}`, requireInteraction: true }); } catch (e) {} } }); }
         function toggleBrowserNotifications() { const checkbox = document.getElementById('browser-notify-toggle'); if (checkbox.checked) { if (!("Notification" in window)) return alert("No soportado"); Notification.requestPermission().then(p => { if (p === "granted") { state.settings.browserNotifications = true; saveData(); new Notification("MyDay OS", { body: "Activado" }); } else { checkbox.checked = false; state.settings.browserNotifications = false; saveData(); alert("Permiso denegado"); } }); } else { state.settings.browserNotifications = false; saveData(); } }
         function showToast(msg, title) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-notification p-4 flex gap-3 items-start cursor-pointer'; t.onclick = () => t.remove(); t.innerHTML = `<div class="bg-accent/20 p-2 rounded-full text-accent shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold">${title}</h4><p class="text-xs opacity-80">${msg}</p></div>`; c.appendChild(t); lucide.createIcons(); setTimeout(() => { t.style.animation = 'slideInRight 0.4s reverse forwards'; setTimeout(()=>t.remove(), 400); }, 5000); }
         function applySettings() { if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`; else document.body.style.backgroundImage = 'none'; const t = document.getElementById('browser-notify-toggle'); if(t) t.checked = state.settings.browserNotifications; const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const accent = state.settings.accentColor || '#007aff'; document.documentElement.style.setProperty('--accent-color', accent); }
-        function setPresetBg(type) { if(type==='white') state.settings.bgUrl = ''; else { const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600', abstract: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600'}; state.settings.bgUrl = urls[type]; } saveData(); applySettings(); }
-        function saveBackground() { const url = document.getElementById('bg-url-input').value; if(url) { state.settings.bgUrl = url; saveData(); applySettings(); showToast("Fondo actualizado", "Personalización"); } }
+        function setPresetBg(type) { if(type==='white') state.settings.bgUrl = ''; else { const urls = {nature:'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1600', dark:'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=1600', abstract: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600'}; state.settings.bgUrl = urls[type]; } saveData(); applySettings(); renderSettingsGeneral(); }
+        function saveBackground() { const url = document.getElementById('bg-url-input').value; if(url) { state.settings.bgUrl = url; saveData(); applySettings(); showToast("Fondo actualizado", "Personalización"); renderSettingsGeneral(); } }
         function exportData() { const a = document.createElement('a'); a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state)); a.download = "myday_backup.json"; a.click(); }
         function importData(input) { const f = input.files[0]; if(!f) return; const r = new FileReader(); r.onload = e => { try { state = {...state, ...JSON.parse(e.target.result)}; saveData(); render(); closeSettings(); } catch(e){alert('Error JSON');} }; r.readAsText(f); }
         function resetAllData() { if(confirm("¿Seguro?")) { localStorage.removeItem('myDayOS_v3'); location.reload(); } }
