@@ -150,27 +150,37 @@
     <main class="w-full max-w-7xl h-[92vh] glass-panel rounded-2xl flex flex-col overflow-hidden relative fade-in">
         
         <!-- Header -->
-        <header class="h-14 flex items-center justify-between px-5 border-b shrink-0 select-none z-20 transition-colors" style="border-bottom-color: var(--glass-border);">
-            <div class="flex gap-2">
-                <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E]/50 cursor-pointer shadow-sm"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24]/50 cursor-pointer shadow-sm"></div>
-                <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
-            </div>
+        <header class="h-14 flex items-center justify-between px-5 border-b shrink-0 select-none z-20 transition-colors relative" style="border-bottom-color: var(--glass-border);">
             
-            <!-- Desktop Nav Buttons (Center) -->
-            <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-1 bg-black/5 dark:bg-white/10 p-1 rounded-lg backdrop-blur-sm">
-                <button onclick="switchView('productivity')" id="desk-nav-prod" class="px-3 py-1 rounded-md text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-accent">Día</button>
-                <button onclick="switchView('notes')" id="desk-nav-notes" class="px-3 py-1 rounded-md text-xs font-medium transition-all text-muted hover:bg-white/50 dark:hover:bg-white/20" style="color: var(--text-muted);">Notas</button>
-            </div>
-            
-            <!-- Title (Mobile) -->
-            <div class="md:hidden text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
-                <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
-                <span id="header-title">MyDay</span>
-            </div>
+            <!-- Left: Traffic Lights & Title -->
+            <div class="flex items-center gap-4 z-20">
+                <div class="flex gap-2">
+                    <div class="w-3.5 h-3.5 rounded-full bg-[#FF5F57] border border-[#E0443E]/50 cursor-pointer shadow-sm"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-[#FEBC2E] border border-[#D89E24]/50 cursor-pointer shadow-sm"></div>
+                    <div class="w-3.5 h-3.5 rounded-full bg-[#28C840] border border-[#1AAB29]/50 cursor-pointer shadow-sm"></div>
+                </div>
+                
+                <!-- Desktop Title -->
+                <div class="hidden md:flex items-center gap-2 text-sm font-semibold tracking-tight opacity-80" style="color: var(--text-main);">
+                    <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
+                    <span>MyDay OS</span>
+                </div>
 
-            <!-- Actions -->
-            <div class="flex items-center gap-4">
+                <!-- Mobile Title -->
+                <div class="md:hidden text-sm font-semibold tracking-tight flex items-center gap-2" style="color: var(--text-main);">
+                    <i data-lucide="command" class="w-4 h-4 opacity-70"></i>
+                    <span id="header-title">MyDay</span>
+                </div>
+            </div>
+            
+            <!-- Center: Desktop Nav Buttons (Segmented Control) -->
+            <div class="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-1 bg-black/5 dark:bg-white/10 p-1 rounded-lg backdrop-blur-sm z-10 border border-white/5 shadow-inner">
+                <button onclick="switchView('productivity')" id="desk-nav-prod" class="px-5 py-1.5 rounded-md text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-accent">Día</button>
+                <button onclick="switchView('notes')" id="desk-nav-notes" class="px-5 py-1.5 rounded-md text-xs font-medium transition-all text-muted hover:bg-white/40 dark:hover:bg-white/20" style="color: var(--text-muted);">Notas</button>
+            </div>
+            
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-4 z-20">
                 <div id="sync-status-indicator" class="sync-badge sync-offline hidden sm:flex" title="Estado">
                     <div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local
                 </div>
@@ -455,13 +465,20 @@
             if(view === 'notes') {
                 prod.classList.add('hidden');
                 notes.classList.remove('hidden');
-                btnNotes.classList.remove('text-muted'); btnNotes.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent');
-                btnProd.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent'); btnProd.classList.add('text-muted');
+                btnNotes.classList.remove('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20'); 
+                btnNotes.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
+                
+                btnProd.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
+                btnProd.classList.add('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20', 'font-medium');
             } else {
                 notes.classList.add('hidden');
                 prod.classList.remove('hidden');
-                btnProd.classList.remove('text-muted'); btnProd.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent');
-                btnNotes.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent'); btnNotes.classList.add('text-muted');
+                
+                btnProd.classList.remove('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20');
+                btnProd.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
+                
+                btnNotes.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-accent', 'font-bold');
+                btnNotes.classList.add('text-muted', 'hover:bg-white/40', 'dark:hover:bg-white/20', 'font-medium');
                 
                 // Handle sub-views for mobile
                 if(view === 'agenda' || view === 'tasks') {
