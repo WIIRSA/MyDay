@@ -22,7 +22,7 @@
     <style>
         /* Tipografía estilo Apple */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             transition: background-image 0.5s ease-in-out, background-color 0.3s ease, color 0.3s ease;
             background-size: cover;
             background-position: center;
@@ -34,30 +34,30 @@
         /* --- VARIABLES DE TEMA --- */
         :root {
             /* Light Mode Default */
-            --bg-body: #f3f4f6;
+            --bg-body: #f2f2f7;
             --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.5);
             --sidebar-bg: rgba(245, 245, 247, 0.6);
-            --text-main: #1f2937;
-            --text-muted: #6b7280;
+            --text-main: #1d1d1f;
+            --text-muted: #86868b;
             --card-bg: rgba(255, 255, 255, 0.8);
             --modal-bg: #ffffff;
-            --input-bg: #f9fafb;
+            --input-bg: #f5f5f7;
             --nav-bg: rgba(255, 255, 255, 0.9);
         }
 
         [data-theme="dark"] {
-            /* Dark Mode Overrides */
-            --bg-body: #111827;
-            --glass-bg: rgba(31, 41, 55, 0.75);
-            --glass-border: rgba(75, 85, 99, 0.4);
-            --sidebar-bg: rgba(17, 24, 39, 0.6);
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --card-bg: rgba(31, 41, 55, 0.6);
-            --modal-bg: #1f2937;
-            --input-bg: #374151;
-            --nav-bg: rgba(31, 41, 55, 0.9);
+            /* Dark Mode Overrides - macOS Neutral */
+            --bg-body: #000000;
+            --glass-bg: rgba(30, 30, 30, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --sidebar-bg: rgba(28, 28, 30, 0.6);
+            --text-main: #f5f5f7;
+            --text-muted: #98989d;
+            --card-bg: rgba(44, 44, 46, 0.6);
+            --modal-bg: #1c1c1e;
+            --input-bg: #2c2c2e;
+            --nav-bg: rgba(28, 28, 30, 0.9);
         }
 
         body {
@@ -152,7 +152,7 @@
         .sync-active { background-color: #dcfce7; color: #166534; }
         .sync-offline { background-color: #f3f4f6; color: #6b7280; }
         
-        .nav-btn-active { color: #3b82f6; } /* Azul Tailwind */
+        .nav-btn-active { color: #007AFF; } /* Azul Apple */
     </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white transition-colors duration-300" id="app-body">
@@ -482,15 +482,13 @@
             if (view === 'agenda') {
                 agenda.classList.remove('mobile-hidden'); agenda.classList.add('mobile-flex');
                 tasks.classList.add('mobile-hidden'); tasks.classList.remove('mobile-flex');
-                btnAgenda.classList.add('nav-btn-active'); btnAgenda.classList.remove('text-gray-400');
-                btnTasks.classList.remove('nav-btn-active'); btnTasks.classList.add('text-gray-400');
-                btnAgenda.style.color = '#3b82f6'; btnTasks.style.color = 'var(--text-muted)';
+                btnAgenda.classList.add('nav-btn-active'); btnAgenda.style.color = '#007AFF';
+                btnTasks.classList.remove('nav-btn-active'); btnTasks.style.color = 'var(--text-muted)';
             } else {
                 tasks.classList.remove('mobile-hidden'); tasks.classList.add('mobile-flex');
                 agenda.classList.add('mobile-hidden'); agenda.classList.remove('mobile-flex');
-                btnTasks.classList.add('nav-btn-active'); btnTasks.classList.remove('text-gray-400');
-                btnAgenda.classList.remove('nav-btn-active'); btnAgenda.classList.add('text-gray-400');
-                btnTasks.style.color = '#3b82f6'; btnAgenda.style.color = 'var(--text-muted)';
+                btnTasks.classList.add('nav-btn-active'); btnTasks.style.color = '#007AFF';
+                btnAgenda.classList.remove('nav-btn-active'); btnAgenda.style.color = 'var(--text-muted)';
             }
         }
 
