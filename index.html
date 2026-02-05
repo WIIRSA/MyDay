@@ -125,6 +125,15 @@
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
+        /* Animation for Status Dot */
+        @keyframes blink-green-gray {
+            0%, 100% { background-color: #22c55e; transform: scale(1); }
+            50% { background-color: #9ca3af; transform: scale(0.85); }
+        }
+        .dot-blink-green {
+            animation: blink-green-gray 4s infinite ease-in-out;
+        }
+
         .nav-btn-active { color: var(--accent-color) !important; }
         .settings-tab-active { background-color: var(--card-bg); color: var(--accent-color) !important; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
 
@@ -183,9 +192,9 @@
             
             <!-- Right: Actions -->
             <div class="flex items-center gap-4 z-20">
-                <!-- Indicador de Sincronización Animado -->
-                <div id="sync-status-indicator" class="flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 opacity-0" title="Estado">
-                    <!-- Icono inyectado por JS -->
+                <!-- Indicador de Sincronización -->
+                <div id="sync-status-indicator" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-300" title="Estado de Nube">
+                    <!-- Contenido inyectado por JS -->
                 </div>
 
                 <button onclick="toggleTheme()" class="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors" title="Cambiar Tema">
@@ -568,51 +577,36 @@
             const el = document.getElementById('sync-status-indicator');
             if (!el) return;
             
-            // Ensure visibility (remove hidden if present from previous logic)
             el.classList.remove('hidden', 'sm:flex'); 
-            // On mobile we might want just icon, on desktop icon+text. 
-            // The logic below rebuilds content.
+            el.classList.add('flex'); 
             
-            let icon = '';
+            // Reset base classes
+            el.className = 'sync-badge hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300 border';
+            
+            let dotClass = '';
             let text = '';
-            let classes = '';
+            let containerClass = '';
 
             if (status === 'syncing') {
-                classes = 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
-                icon = 'refresh-cw';
-                text = 'Sincronizando';
-                el.classList.add('opacity-100'); // Make visible
+                containerClass = 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
+                dotClass = 'bg-yellow-500 animate-pulse'; 
+                text = 'Guardando...';
             } else if (status === 'online') {
-                classes = 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400';
-                icon = 'cloud';
+                containerClass = 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
+                dotClass = 'dot-blink-green'; 
                 text = 'En línea';
-                // Optional: Fade out online status after a while if desired, or keep it.
-                // Let's keep it visible on desktop, maybe just icon on mobile.
-                el.classList.add('opacity-100');
             } else if (status === 'local') {
-                classes = 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400';
-                icon = 'hard-drive';
+                containerClass = 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
+                dotClass = 'bg-gray-400';
                 text = 'Local';
-                el.classList.add('opacity-100');
             } else {
-                classes = 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400';
-                icon = 'wifi-off';
+                containerClass = 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
+                dotClass = 'bg-red-500';
                 text = 'Error';
-                el.classList.add('opacity-100');
             }
 
-            el.className = `sync-badge transition-all duration-300 ${classes}`;
-            const animClass = status === 'syncing' ? 'animate-spin' : '';
-            
-            el.innerHTML = `
-                <i data-lucide="${icon}" class="w-3.5 h-3.5 ${animClass}"></i>
-                <span class="hidden sm:inline ml-1">${text}</span>
-            `;
-            
-            lucide.createIcons();
-            
-            // Auto-hide "Online" status on mobile after a few seconds to save space? 
-            // Or just keep it. User requested feedback.
+            el.classList.add(...containerClass.split(' '));
+            el.innerHTML = `<div class="w-2 h-2 rounded-full ${dotClass}"></div>${text}`;
         }
 
         // --- NAVIGATION LOGIC ---
@@ -960,7 +954,7 @@
             const timeEl = document.getElementById('live-clock'); if(timeEl) timeEl.textContent = timeStr;
         }
 
-        function saveTimezone() { const select = document.getElementById('timezone-select'); state.settings.timezone = select.value; saveData(); updateClock(); renderDays(); renderSchedule(); showToast(`Hora cambiada`, 'Sistema'); }
+        function saveTimezone() { const select = document.getElementById('timezone-select'); state.settings.timezone = select.value; saveData(); updateClock(); renderDays(); renderSchedule(); setSyncStatus('syncing'); setTimeout(() => setSyncStatus('online'), 1000); }
         function toggleTheme() { state.settings.theme = state.settings.theme === 'light' ? 'dark' : 'light'; saveData(); applyTheme(); }
         function applyTheme() {
             const html = document.documentElement; const icon = document.getElementById('theme-icon');
@@ -974,11 +968,11 @@
                 currentUser = user;
                 if(user) {
                     document.getElementById('auth-ui').classList.add('hidden'); document.getElementById('user-ui').classList.remove('hidden'); document.getElementById('user-avatar').classList.remove('hidden'); document.getElementById('user-photo').src = user.photoURL; document.getElementById('user-img-settings').src = user.photoURL; document.getElementById('user-name-settings').innerText = user.displayName;
-                    const status = document.getElementById('sync-status-indicator'); if(status) { status.className = 'sync-badge sync-active hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Nube'; }
+                    setSyncStatus('online');
                     activateFirestoreSync(user.uid);
                 } else {
                     document.getElementById('auth-ui').classList.remove('hidden'); document.getElementById('user-ui').classList.add('hidden'); document.getElementById('user-avatar').classList.add('hidden');
-                    const status = document.getElementById('sync-status-indicator'); if(status) { status.className = 'sync-badge sync-offline hidden sm:flex'; status.innerHTML = '<div class="w-1.5 h-1.5 rounded-full bg-current"></div> Local'; }
+                    setSyncStatus('local');
                     if(unsubscribeSnapshot) unsubscribeSnapshot();
                 }
             });
@@ -994,7 +988,7 @@
                     state.notes = remoteData.notes || []; // Sync Notes
                     if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
                     render();
-                    if(!firstLoad) showToast('Datos actualizados', 'Nube');
+                    setSyncStatus('online');
                 } else if(!doc.exists && (state.schedule.length > 0 || state.todos.length > 0 || state.notes.length > 0)) { saveDataToCloud(); }
                 firstLoad = false;
             });
@@ -1002,7 +996,23 @@
         function loginWithGoogle() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p); }
         function logout() { auth.signOut(); }
         async function saveData() { localStorage.setItem('myDayOS_v3', JSON.stringify(state)); renderStats(); if(isCloudAvailable && currentUser) saveDataToCloud(); }
-        let saveTimeout; function saveDataToCloud() { if (!isCloudAvailable || !currentUser) return; clearTimeout(saveTimeout); isSaving = true; saveTimeout = setTimeout(async () => { try { const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main'); await docRef.set({ schedule: state.schedule, todos: state.todos, notes: state.notes, categories: state.categories, settings: state.settings, lastUpdated: new Date() }); } catch(e) { console.error(e); } isSaving = false; }, 1000); }
+        let saveTimeout; function saveDataToCloud() { 
+            if (!isCloudAvailable || !currentUser) return; 
+            clearTimeout(saveTimeout); 
+            isSaving = true; 
+            setSyncStatus('syncing');
+            saveTimeout = setTimeout(async () => { 
+                try { 
+                    const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main'); 
+                    await docRef.set({ schedule: state.schedule, todos: state.todos, notes: state.notes, categories: state.categories, settings: state.settings, lastUpdated: new Date() }); 
+                    setSyncStatus('online');
+                } catch(e) { 
+                    console.error(e); 
+                    setSyncStatus('error');
+                } 
+                isSaving = false; 
+            }, 1000); 
+        }
         function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const bgInput = document.getElementById('bg-url-input'); if(bgInput) bgInput.value = state.settings.bgUrl || ''; switchSettingsTab('general'); renderCategoriesList(); }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
         function switchSettingsTab(tabId) { document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden')); document.getElementById('tab-' + tabId).classList.remove('hidden'); document.querySelectorAll('.settings-tab-btn').forEach(btn => { if(btn.dataset.tab === tabId) { btn.classList.add('settings-tab-active'); btn.style.color = 'var(--accent-color)'; } else { btn.classList.remove('settings-tab-active'); btn.style.color = 'var(--text-main)'; } }); }
