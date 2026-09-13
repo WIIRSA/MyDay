@@ -8,13 +8,14 @@
     <!-- PWA Settings -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MyDay">
-    <meta name="application-name" content="MyDay OS">
-    <link rel="icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg">
+    <meta name="apple-mobile-web-app-title" content="MyDay Notebook">
+    <meta name="application-name" content="MyDay Notebook">
+    <meta name="description" content="MyDay Notebook - Tu organizador personal de agenda, tareas y notas, con sincronización en la nube.">
+    <link rel="icon" href="./myday-app/mydaynotebook.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="./myday-app/mydaynotebook.svg">
     <link id="manifest-link" rel="manifest" href="">
 
-    <title>MyDay OS 3.0 - PWA</title>
+    <title>MyDay Notebook - Tu organizador personal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Firebase SDKs -->
@@ -408,10 +409,24 @@
                     </div>
 
                     <div id="tab-cloud" class="settings-content hidden">
-                        <h2 class="text-xl font-bold mb-4">Sincronización Google</h2>
-                        <div id="auth-ui" class="text-center py-8">
-                            <p class="text-sm mb-4 opacity-70">Guarda tus datos en la nube.</p>
-                            <button onclick="loginWithGoogle()" class="bg-white border text-gray-700 px-6 py-3 rounded-xl shadow-sm flex items-center gap-3 w-full justify-center font-medium hover:bg-gray-50"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Conectar Google</button>
+                        <h2 class="text-xl font-bold mb-4">Sincronización en la Nube</h2>
+                        <div id="auth-ui" class="py-2">
+                            <form id="email-auth-form" onsubmit="handleEmailAuth(event)" class="space-y-3 mb-6 bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div class="flex justify-between items-center mb-2">
+                                    <p class="text-xs font-bold uppercase opacity-60">Correo y Contraseña</p>
+                                    <button type="button" onclick="handlePasswordReset()" class="text-[10px] font-medium text-blue-500 hover:underline">¿Recuperar contraseña?</button>
+                                </div>
+                                <input type="email" id="auth-email" placeholder="Correo electrónico" required class="theme-input w-full px-3 py-2 rounded-lg outline-none text-sm">
+                                <input type="password" id="auth-password" placeholder="Contraseña (Mínimo 6 carácteres)" required minlength="6" class="theme-input w-full px-3 py-2 rounded-lg outline-none text-sm">
+                                <div class="flex gap-2 mt-2">
+                                    <button type="submit" class="flex-1 btn-primary text-white py-2 rounded-lg font-medium text-sm">Iniciar Sesión</button>
+                                    <button type="button" onclick="handleEmailRegister()" class="flex-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-medium text-sm hover:bg-gray-50 dark:hover:bg-gray-600">Crear Cuenta</button>
+                                </div>
+                            </form>
+                            <div class="flex items-center gap-2 mb-4 opacity-50"><div class="h-px bg-gray-300 dark:bg-gray-600 flex-1"></div><span class="text-[10px] font-bold uppercase">o usa google</span><div class="h-px bg-gray-300 dark:bg-gray-600 flex-1"></div></div>
+                            <button onclick="loginWithGoogle()" class="bg-white dark:bg-gray-800 border dark:border-gray-700 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-xl shadow-sm flex items-center gap-3 w-full justify-center font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5"> Conectar Google
+                            </button>
                         </div>
                         <div id="user-ui" class="hidden">
                             <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-xl border border-green-100 dark:border-green-800 mb-4 flex items-center gap-3"><img id="user-img-settings" src="" class="w-10 h-10 rounded-full"><div class="overflow-hidden"><div id="user-name-settings" class="font-bold truncate" style="color: var(--text-main);">Usuario</div><div class="text-xs text-green-700 dark:text-green-400 font-medium">Sincronización activa</div></div></div>
@@ -511,9 +526,9 @@
 
         function init() {
             const manifest = {
-                name: "MyDay OS", short_name: "MyDay", start_url: ".", display: "standalone",
+                name: "MyDay Notebook", short_name: "MyDay", start_url: ".", display: "standalone",
                 background_color: "#f2f2f7", theme_color: "#f2f2f7",
-                icons: [{ src: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/calendar-check-2.svg", sizes: "192x192", type: "image/svg+xml" }]
+                icons: [{ src: "./myday-app/mydaynotebook.svg", sizes: "any", type: "image/svg+xml" }]
             };
             const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
             document.getElementById('manifest-link').href = URL.createObjectURL(blob);
@@ -671,6 +686,16 @@
         function openModal(type, id = null) {
             modalConfig = {type, id};
             const modal = document.getElementById('modal'), content = document.getElementById('modal-content'), backdrop = document.getElementById('modal-backdrop');
+            
+            // Expandir modal para notas en desktop
+            if (type === 'note') {
+                content.classList.remove('md:max-w-lg');
+                content.classList.add('md:max-w-3xl');
+            } else {
+                content.classList.remove('md:max-w-3xl');
+                content.classList.add('md:max-w-lg');
+            }
+
             let data = null;
             if(id) {
                 if(type === 'schedule') data = state.schedule.find(x => x.id === id);
@@ -782,7 +807,7 @@
                     <div class="mb-4">
                         <input type="text" name="title" value="${data?data.title:''}" required class="${inputClass} font-bold text-lg" placeholder="Título de la nota">
                     </div>
-                    <textarea name="content" class="${inputClass} h-40 resize-none" placeholder="Escribe aquí...">${data?data.content:''}</textarea>
+                    <textarea name="content" class="${inputClass} h-64 md:h-80 resize-y min-h-[160px]" placeholder="Escribe aquí...">${data?data.content:''}</textarea>
                     <div class="flex gap-3 pt-2 justify-center" id="note-color-picker-container">${colorPicker}</div>
                     <input type="hidden" name="color" id="note-color-input" value="${data?data.color:'#007aff'}">
                 `;
@@ -1142,6 +1167,48 @@
             });
         }
         function loginWithGoogle() { const p = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(p); }
+        function handleEmailAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            showToast("Iniciando sesión...", "Auth");
+            auth.signInWithEmailAndPassword(email, password).then(res => {
+                showToast("Conectado: " + res.user.email, "Auth");
+                document.getElementById('auth-email').value = '';
+                document.getElementById('auth-password').value = '';
+            }).catch(err => {
+                let msg = err.message;
+                if(err.code === 'auth/user-not-found') msg = 'Usuario no encontrado. Crea una cuenta primero.';
+                if(err.code === 'auth/wrong-password') msg = 'Contraseña incorrecta.';
+                showToast("Error: " + msg, "Auth");
+            });
+        }
+        function handleEmailRegister() {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            if(!email || password.length < 6) return showToast("Ingresa un correo válido y una contraseña de min. 6 caracteres", "Auth");
+            showToast("Creando cuenta...", "Auth");
+            auth.createUserWithEmailAndPassword(email, password).then(res => {
+                showToast("Cuenta creada: " + res.user.email, "Auth");
+                document.getElementById('auth-email').value = '';
+                document.getElementById('auth-password').value = '';
+            }).catch(err => {
+                let msg = err.message;
+                if(err.code === 'auth/email-already-in-use') msg = 'El correo ya está registrado con Google. Usa "Recuperar contraseña" para asignarle una clave.';
+                showToast("Error: " + msg, "Auth");
+            });
+        }
+        function handlePasswordReset() {
+            const email = document.getElementById('auth-email').value;
+            if(!email) return showToast("Por favor ingresa tu correo primero para enviarte el enlace", "Auth");
+            auth.sendPasswordResetEmail(email).then(() => {
+                showToast("Correo de recuperación enviado. Revisa tu bandeja de entrada.", "Auth");
+            }).catch(err => {
+                let msg = err.message;
+                if(err.code === 'auth/user-not-found') msg = 'No hay cuenta registrada con ese correo.';
+                showToast("Error: " + msg, "Auth");
+            });
+        }
         function logout() { auth.signOut(); }
         async function saveData() { localStorage.setItem('myDayOS_v3', JSON.stringify(state)); renderStats(); if(isCloudAvailable && currentUser) saveDataToCloud(); }
         let saveTimeout; function saveDataToCloud() { 
@@ -1164,7 +1231,7 @@
         function openSettings() { document.getElementById('settings-modal').classList.remove('hidden'); const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const bgInput = document.getElementById('bg-url-input'); if(bgInput) bgInput.value = state.settings.bgUrl || ''; renderSettingsGeneral(); switchSettingsTab('general'); renderCategoriesList(); }
         function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
         function switchSettingsTab(tabId) { document.querySelectorAll('.settings-content').forEach(el => el.classList.add('hidden')); document.getElementById('tab-' + tabId).classList.remove('hidden'); document.querySelectorAll('.settings-tab-btn').forEach(btn => { if(btn.dataset.tab === tabId) { btn.classList.add('settings-tab-active'); btn.style.color = 'var(--accent-color)'; } else { btn.classList.remove('settings-tab-active'); btn.style.color = 'var(--text-main)'; } }); }
-        function checkNotifications() { const now = getNowInTimezone(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const currentTime = `${hours}:${minutes}`; const currentDayName = DAYS_FULL[now.getDay()]; const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime); events.forEach(event => { showToast(`Es hora: ${event.title}`, 'Recordatorio'); if (state.settings.browserNotifications && Notification.permission === "granted") { try { new Notification("MyDay OS", { body: `Evento: ${event.title}`, icon: "https://cdn.jsdelivr.net/npm/lucide-static@latest/icons/clock.svg", tag: `evt-${event.id}`, requireInteraction: true }); } catch (e) {} } }); }
+        function checkNotifications() { const now = getNowInTimezone(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const currentTime = `${hours}:${minutes}`; const currentDayName = DAYS_FULL[now.getDay()]; const events = state.schedule.filter(s => s.day === currentDayName && s.time === currentTime); events.forEach(event => { showToast(`Es hora: ${event.title}`, 'Recordatorio'); if (state.settings.browserNotifications && Notification.permission === "granted") { try { new Notification("MyDay Notebook", { body: `Evento: ${event.title}`, icon: "./myday-app/mydaynotebook.svg", tag: `evt-${event.id}`, requireInteraction: true }); } catch (e) {} } }); }
         function toggleBrowserNotifications() { const checkbox = document.getElementById('browser-notify-toggle'); if (checkbox.checked) { if (!("Notification" in window)) return alert("No soportado"); Notification.requestPermission().then(p => { if (p === "granted") { state.settings.browserNotifications = true; saveData(); new Notification("MyDay OS", { body: "Activado" }); } else { checkbox.checked = false; state.settings.browserNotifications = false; saveData(); alert("Permiso denegado"); } }); } else { state.settings.browserNotifications = false; saveData(); } }
         function showToast(msg, title) { const c = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast-notification p-4 flex gap-3 items-start cursor-pointer'; t.onclick = () => t.remove(); t.innerHTML = `<div class="bg-accent/20 p-2 rounded-full text-accent shrink-0"><i data-lucide="bell" class="w-5 h-5"></i></div><div><h4 class="text-sm font-bold">${title}</h4><p class="text-xs opacity-80">${msg}</p></div>`; c.appendChild(t); lucide.createIcons(); setTimeout(() => { t.style.animation = 'slideInRight 0.4s reverse forwards'; setTimeout(()=>t.remove(), 400); }, 5000); }
         function applySettings() { if(state.settings.bgUrl) document.body.style.backgroundImage = `url('${state.settings.bgUrl}')`; else document.body.style.backgroundImage = 'none'; const t = document.getElementById('browser-notify-toggle'); if(t) t.checked = state.settings.browserNotifications; const tzSelect = document.getElementById('timezone-select'); if(tzSelect) tzSelect.value = state.settings.timezone || 'system'; const accent = state.settings.accentColor || '#007aff'; document.documentElement.style.setProperty('--accent-color', accent); }
