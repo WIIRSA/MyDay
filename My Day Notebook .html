@@ -1157,9 +1157,49 @@
             unsubscribeSnapshot = docRef.onSnapshot((doc) => {
                 if(doc.exists && !isSaving) {
                     const remoteData = doc.data();
-                    state.schedule = remoteData.schedule || []; state.todos = remoteData.todos || []; state.categories = remoteData.categories || state.categories; 
-                    state.notes = remoteData.notes || []; // Sync Notes
-                    if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
+                    const remoteTime = remoteData.lastUpdated ? (remoteData.lastUpdated.toMillis ? remoteData.lastUpdated.toMillis() : new Date(remoteData.lastUpdated).getTime()) : 0;
+                    const localTime = state.lastUpdated ? new Date(state.lastUpdated).getTime() : 0;
+
+                    if (firstLoad) {
+                        let merged = false;
+                        const mergeArrays = (local, remote) => {
+                            const map = new Map();
+                            remote.forEach(i => map.set(i.id, i));
+                            local.forEach(i => {
+                                if (!map.has(i.id)) { map.set(i.id, i); merged = true; }
+                                else if (localTime > remoteTime) { map.set(i.id, i); merged = true; }
+                            });
+                            return Array.from(map.values());
+                        };
+
+                        if (localTime > 0) {
+                            state.todos = mergeArrays(state.todos, remoteData.todos || []);
+                            state.schedule = mergeArrays(state.schedule, remoteData.schedule || []);
+                            state.notes = mergeArrays(state.notes, remoteData.notes || []);
+                        } else {
+                            state.todos = remoteData.todos || [];
+                            state.schedule = remoteData.schedule || [];
+                            state.notes = remoteData.notes || [];
+                        }
+                        
+                        state.categories = remoteData.categories || state.categories; 
+                        if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
+
+                        if (merged || localTime > remoteTime) {
+                            saveDataToCloud();
+                        } else {
+                            state.lastUpdated = remoteTime;
+                            localStorage.setItem('myDayOS_v3', JSON.stringify(state));
+                        }
+                    } else {
+                        state.schedule = remoteData.schedule || []; 
+                        state.todos = remoteData.todos || []; 
+                        state.categories = remoteData.categories || state.categories; 
+                        state.notes = remoteData.notes || []; 
+                        if(remoteData.settings) { state.settings = {...state.settings, ...remoteData.settings}; }
+                        state.lastUpdated = remoteTime;
+                        localStorage.setItem('myDayOS_v3', JSON.stringify(state));
+                    }
                     render();
                     setSyncStatus('online');
                 } else if(!doc.exists && (state.schedule.length > 0 || state.todos.length > 0 || state.notes.length > 0)) { saveDataToCloud(); }
@@ -1209,8 +1249,8 @@
                 showToast("Error: " + msg, "Auth");
             });
         }
-        function logout() { auth.signOut(); }
-        async function saveData() { localStorage.setItem('myDayOS_v3', JSON.stringify(state)); renderStats(); if(isCloudAvailable && currentUser) saveDataToCloud(); }
+        function logout() { auth.signOut(); localStorage.removeItem('myDayOS_v3'); location.reload(); }
+        async function saveData() { state.lastUpdated = new Date().getTime(); localStorage.setItem('myDayOS_v3', JSON.stringify(state)); renderStats(); if(isCloudAvailable && currentUser) saveDataToCloud(); }
         let saveTimeout; function saveDataToCloud() { 
             if (!isCloudAvailable || !currentUser) return; 
             clearTimeout(saveTimeout); 
@@ -1219,7 +1259,7 @@
             saveTimeout = setTimeout(async () => { 
                 try { 
                     const docRef = db.collection('artifacts').doc(appId).collection('users').doc(currentUser.uid).collection('data').doc('main'); 
-                    await docRef.set({ schedule: state.schedule, todos: state.todos, notes: state.notes, categories: state.categories, settings: state.settings, lastUpdated: new Date() }); 
+                    await docRef.set({ schedule: state.schedule, todos: state.todos, notes: state.notes, categories: state.categories, settings: state.settings, lastUpdated: state.lastUpdated || new Date().getTime() }); 
                     setSyncStatus('online');
                 } catch(e) { 
                     console.error(e); 
